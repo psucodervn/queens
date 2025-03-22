@@ -11,8 +11,6 @@ import { Switch } from '@/components/ui/switch';
 interface SettingsDialogProps {
   showClashingQueens: boolean;
   toggleShowClashingQueens: () => void;
-  showInstructions: boolean;
-  toggleShowInstructions: () => void;
   autoPlaceXs: boolean;
   toggleAutoPlaceXs: () => void;
   showClock: boolean;
@@ -22,8 +20,6 @@ interface SettingsDialogProps {
 const SettingsDialog = ({
   showClashingQueens,
   toggleShowClashingQueens,
-  showInstructions,
-  toggleShowInstructions,
   autoPlaceXs,
   toggleAutoPlaceXs,
   showClock,
@@ -52,10 +48,6 @@ const SettingsDialog = ({
           <div className="flex items-center justify-between space-x-3">
             <div>Show Clashing Queens</div>
             <Switch checked={showClashingQueens} onCheckedChange={toggleShowClashingQueens} />
-          </div>
-          <div className="flex items-center justify-between space-x-3">
-            <div>Show Instructions</div>
-            <Switch checked={showInstructions} onCheckedChange={toggleShowInstructions} />
           </div>
         </div>
       </DialogContent>

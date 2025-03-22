@@ -14,30 +14,3 @@ export type AuthModel = {
   created: string;
   updated: string;
 };
-
-// Load auth store from local storage
-try {
-  const authData = localStorage.getItem('pocketbase_auth');
-  if (authData) {
-    const parsedData = JSON.parse(authData);
-    pb.authStore.save(parsedData.token, parsedData.model);
-  }
-} catch (error) {
-  console.error('Error loading auth data:', error);
-  pb.authStore.clear();
-}
-
-// Subscribe to auth store changes to persist in local storage
-pb.authStore.onChange(() => {
-  try {
-    localStorage.setItem(
-      'pocketbase_auth',
-      JSON.stringify({
-        token: pb.authStore.token,
-        model: pb.authStore.model,
-      })
-    );
-  } catch (error) {
-    console.error('Error saving auth data:', error);
-  }
-}, true);

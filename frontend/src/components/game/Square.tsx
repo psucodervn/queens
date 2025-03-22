@@ -50,7 +50,7 @@ const Square = ({
     ];
 
     adjacentSquares.forEach(({ position, value: adjValue }) => {
-      if (adjValue === null) {
+      if (adjValue === ' ') {
         borderClasses.push(`thick-border-${position[0]}`); // Add thick border if adjacent square is empty
         borderClasses.push(`thick-outer-border-${position[0]}`);
       } else if (adjValue !== region) {

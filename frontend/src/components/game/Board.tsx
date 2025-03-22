@@ -12,7 +12,7 @@ const Board = ({
   showClashingQueens,
   clashingQueens,
 }: {
-  board: number[][];
+  board: string[][];
   handleSquareClick: (row: number, col: number) => void;
   handleSquareMouseEnter: (squares: number[][]) => void;
   level: Level;
@@ -41,7 +41,7 @@ const Board = ({
             key={`${rowIndex}-${colIndex}`}
             row={rowIndex}
             col={colIndex}
-            value={square.toString()}
+            value={square}
             region={colorRegions[rowIndex][colIndex]}
             onPointerDown={(e) => {
               const currentSquare = `${rowIndex},${colIndex}`;

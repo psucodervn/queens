@@ -1,8 +1,8 @@
 // Helper function to create an empty board
-export const createEmptyBoard = (size: number): (string | null)[][] => {
+export const createEmptyBoard = (size: number): string[][] => {
   return Array(size)
-    .fill(null)
-    .map(() => Array(size).fill(null)); // Create an empty board based on the size parameter
+    .fill(' ')
+    .map(() => Array(size).fill(' ')); // Create an empty board based on the size parameter
 };
 
 export const createInitialBoardForBuilder = (size: number, fill: string): string[][] => {

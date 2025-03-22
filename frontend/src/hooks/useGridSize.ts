@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 
 const useGridSize = (boardSize: number) => {
@@ -25,7 +27,7 @@ const useGridSize = (boardSize: number) => {
   const largeScreenGridSize = '50px';
 
   const getInitialGridSize = () => {
-    const windowWidth = window.innerWidth;
+    const windowWidth = 1000; //window.innerWidth;
 
     if (windowWidth >= 480) {
       return largeScreenGridSize; // For larger screens (>= 480px)
