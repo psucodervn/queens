@@ -13,7 +13,7 @@ type Player = {
 export default function RoomPage() {
   const { roomId } = useParams();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [boardSize, setBoardSize] = useState(8);
+  const [boardSize] = useState(8);
   const [board, setBoard] = useState<number[][]>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
   const [timer, setTimer] = useState(0);

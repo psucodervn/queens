@@ -2,24 +2,29 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+
+import { useAuth } from '@/lib/auth-context';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement signup logic here
+    setError('');
+    setIsLoading(true);
+
     try {
-      // Placeholder for signup API call
-      console.log('Signup attempt with:', { email, username, password });
-      router.push('/dashboard');
+      await signup(email, username, password);
     } catch (err) {
-      setError('Registration failed');
+      setError(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -32,7 +37,14 @@ export default function SignUpPage() {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="text-center text-sm text-red-500">{error}</div>}
+          {error && (
+            <div
+              className="relative rounded border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+              role="alert"
+            >
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <input
@@ -42,6 +54,7 @@ export default function SignUpPage() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -52,6 +65,7 @@ export default function SignUpPage() {
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -62,6 +76,8 @@ export default function SignUpPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                minLength={8}
               />
             </div>
           </div>
@@ -69,9 +85,34 @@ export default function SignUpPage() {
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
             >
-              Sign up
+              {isLoading ? (
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg
+                    className="h-5 w-5 animate-spin text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+              ) : null}
+              {isLoading ? 'Creating account...' : 'Sign up'}
             </button>
           </div>
         </form>
