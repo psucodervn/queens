@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
       const isAuthRoute = ['/login', '/signup'].includes(pathname);
-      const isProtectedRoute = ['/dashboard', '/single-player', '/room', '/profile'].some((route) =>
+      const isProtectedRoute = ['/practice', '/room', '/profile'].some((route) =>
         pathname.startsWith(route)
       );
 
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (user && isAuthRoute) {
-        router.push('/dashboard');
+        router.push('/');
       } else if (!user && isProtectedRoute) {
         router.push('/login');
       }
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const authData = await pb.collection('users').authWithPassword(email, password);
       console.log('Login successful:', authData);
       updateUserFromModel(authData.record);
-      router.push('/dashboard');
+      router.push('/');
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

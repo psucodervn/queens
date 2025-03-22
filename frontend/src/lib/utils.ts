@@ -1,4 +1,10 @@
+import { clsx, type ClassValue } from 'clsx';
 import { ClientResponseError } from 'pocketbase';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof ClientResponseError) {
@@ -19,4 +25,10 @@ export function getErrorMessage(error: unknown): string {
   }
 
   return 'An unexpected error occurred';
+}
+
+export function formatDuration(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
