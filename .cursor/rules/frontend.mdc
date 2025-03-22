@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Always use pnpm, pnpx instead of npm, npx.
+- Always run code formatting and linting after and changes.
