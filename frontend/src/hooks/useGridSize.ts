@@ -27,15 +27,21 @@ const useGridSize = (boardSize: number) => {
   const largeScreenGridSize = '50px';
 
   const getInitialGridSize = () => {
-    const windowWidth = 1000; //window.innerWidth;
+    // Check if window is defined (client-side)
+    if (typeof window !== 'undefined') {
+      const windowWidth = window.innerWidth;
 
-    if (windowWidth >= 480) {
-      return largeScreenGridSize; // For larger screens (>= 480px)
-    } else if (windowWidth >= 345) {
-      return smallScreenGridSize; // For smaller screens (>= 345px but < 480px)
-    } else {
-      return extraSmallScreenGridSize; // For extra small screens (< 345px)
+      if (windowWidth >= 480) {
+        return largeScreenGridSize; // For larger screens (>= 480px)
+      } else if (windowWidth >= 345) {
+        return smallScreenGridSize; // For smaller screens (>= 345px but < 480px)
+      } else {
+        return extraSmallScreenGridSize; // For extra small screens (< 345px)
+      }
     }
+
+    // Default to largeScreenGridSize during SSR
+    return largeScreenGridSize;
   };
 
   const [gridSize, setGridSize] = useState(getInitialGridSize);

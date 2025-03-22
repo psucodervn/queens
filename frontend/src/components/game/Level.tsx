@@ -9,15 +9,11 @@ import ResetIcon from '@/components/icons/ResetIcon';
 import { createEmptyBoard } from '@/lib/game/board';
 import { checkWinCondition, getClashingQueens, Level } from '@/lib/game/logic';
 import {
-  getAutoPlaceXsPreference,
-  getClashingQueensPreference,
-  getShowClockPreference,
-  isLevelCompleted,
-  markLevelAsCompleted,
-  setAutoPlaceXsPreference,
-  setClashingQueensPreference,
-  setShowClockPreference,
-} from '@/lib/localStorage';
+  useAutoPlaceXsPreference,
+  useClashingQueensPreference,
+  useCompletedLevels,
+  useShowClockPreference,
+} from '@/hooks/useLocalStorage';
 
 const LevelBoard = ({ id, level }: { id: string; level: Level }) => {
   const levelSize = level.size;
@@ -29,9 +25,11 @@ const LevelBoard = ({ id, level }: { id: string; level: Level }) => {
   const [timer, setTimer] = useState(0);
   const [showWinningScreen, setShowWinningScreen] = useState(false);
   const [clashingQueens, setClashingQueens] = useState<Set<string>>(new Set());
-  const [showClashingQueens, setShowClashingQueens] = useState(getClashingQueensPreference);
-  const [showClock, setShowClock] = useState(getShowClockPreference);
-  const [autoPlaceXs, setAutoPlaceXs] = useState(getAutoPlaceXsPreference);
+
+  const [showClashingQueens, setShowClashingQueens] = useClashingQueensPreference();
+  const [showClock, setShowClock] = useShowClockPreference();
+  const [autoPlaceXs, setAutoPlaceXs] = useAutoPlaceXsPreference();
+  const { isLevelCompleted, markLevelAsCompleted } = useCompletedLevels();
 
   const boardSize = levelSize;
   const colorRegions = level.colorRegions;
@@ -248,19 +246,16 @@ const LevelBoard = ({ id, level }: { id: string; level: Level }) => {
   const toggleClashingQueens = () => {
     const newSetting = !showClashingQueens;
     setShowClashingQueens(newSetting);
-    setClashingQueensPreference(newSetting);
   };
 
   const toggleShowClock = () => {
     const newSetting = !showClock;
     setShowClock(newSetting);
-    setShowClockPreference(newSetting);
   };
 
   const toggleAutoPlaceXs = () => {
     const newSetting = !autoPlaceXs;
     setAutoPlaceXs(newSetting);
-    setAutoPlaceXsPreference(newSetting);
   };
 
   const handleTimeUpdate = (time: number) => {
