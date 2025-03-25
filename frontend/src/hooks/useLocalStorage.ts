@@ -30,7 +30,7 @@ export const useShowClockPreference = () => {
 };
 
 export const useAutoPlaceXsPreference = () => {
-  return useLocalStorage('autoPlaceXs', false);
+  return useLocalStorage('autoPlaceXs', true);
 };
 
 export const useGroupingPreference = () => {

@@ -42,11 +42,11 @@ export default function HomePage() {
         {/* Game Modes */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Link
-            href="/single-player"
+            href="/practice"
             className="block rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-lg"
           >
             <h3 className="mb-2 text-lg font-semibold">Single Player</h3>
-            <p className="text-gray-600">Practice solving N-Queens puzzles at your own pace</p>
+            <p className="text-gray-600">Practice solving Queens puzzles at your own pace</p>
           </Link>
 
           <Link

@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 
-import { Level } from '@/lib/game/logic';
+import { Board } from '@/lib/game/board';
 import useGridSize from '@/hooks/useGridSize';
 import Square from './Square';
 
-const Board = ({
+const GameBoard = ({
   board,
   handleSquareClick,
   handleSquareMouseEnter,
-  level,
   showClashingQueens,
   clashingQueens,
 }: {
-  board: string[][];
+  board: Board;
   handleSquareClick: (row: number, col: number) => void;
   handleSquareMouseEnter: (squares: number[][]) => void;
-  level: Level;
   showClashingQueens: boolean;
   clashingQueens: Set<string>;
 }) => {
@@ -25,11 +23,9 @@ const Board = ({
 
   const { gridSize } = useGridSize(board.length);
 
-  const colorRegions = level.colorRegions;
-
   return (
     <div
-      className="board"
+      className="board border-1 border-black"
       style={{
         gridTemplateColumns: `repeat(${board.length}, ${gridSize})`,
         gridTemplateRows: `repeat(${board.length}, ${gridSize})`,
@@ -39,10 +35,8 @@ const Board = ({
         row.map((square, colIndex) => (
           <Square
             key={`${rowIndex}-${colIndex}`}
-            row={rowIndex}
-            col={colIndex}
-            value={square}
-            region={colorRegions[rowIndex][colIndex]}
+            value={square.value}
+            color={square.color}
             onPointerDown={(e) => {
               const currentSquare = `${rowIndex},${colIndex}`;
               setInitialSquare(currentSquare);
@@ -78,7 +72,6 @@ const Board = ({
               setInitialSquare(undefined);
               setInitialSquareHandled(false);
             }}
-            level={level}
             isClashing={showClashingQueens && clashingQueens.has(`${rowIndex},${colIndex}`)}
             data-row={rowIndex} // Add data attributes for touch handling
             data-col={colIndex}
@@ -89,4 +82,4 @@ const Board = ({
   );
 };
 
-export default Board;
+export default GameBoard;

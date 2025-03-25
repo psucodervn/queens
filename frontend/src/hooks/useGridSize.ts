@@ -77,7 +77,7 @@ const useGridSize = (boardSize: number) => {
       smallScreenQuery.removeEventListener('change', handleResize);
       extraSmallScreenQuery.removeEventListener('change', handleResize);
     };
-  }, [boardSize]);
+  }, [boardSize, extraSmallScreenGridSize, smallScreenGridSize, largeScreenGridSize]);
 
   return { gridSize };
 };

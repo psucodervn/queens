@@ -1,11 +1,11 @@
-export type Board = (string | null)[][];
-export type ColorRegions = string[][];
+import { Board, ColorRegions, RegionColors } from './board';
+
 export type Position = { row: number; col: number };
 
 export type Level = {
   size: number;
   colorRegions: ColorRegions;
-  regionColors: Record<string, string>;
+  regionColors: RegionColors;
 };
 
 // Check if it's safe to place a queen
@@ -13,14 +13,11 @@ export const isSafeToPlaceQueen = (
   board: Board,
   row: number,
   col: number,
-  size: number,
-  colorRegions: ColorRegions
+  size: number
 ): boolean => {
-  const region = colorRegions[row][col];
-
   // Check for same row and column
   for (let i = 0; i < size; i++) {
-    if (board[row][i] === 'Q' || board[i][col] === 'Q') return false;
+    if (board[row][i].value === 'Q' || board[i][col].value === 'Q') return false;
   }
 
   // Check adjacent diagonal squares
@@ -32,13 +29,14 @@ export const isSafeToPlaceQueen = (
   ];
 
   for (const [r, c] of adjacentDiagonals) {
-    if (board[r]?.[c] === 'Q') return false;
+    if (board[r]?.[c]?.value === 'Q') return false;
   }
 
   // Check for the same region
+  const color = board[row][col].color;
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
-      if (colorRegions[r][c] === region && board[r][c] === 'Q') {
+      if (board[r][c].color === color && board[r][c].value === 'Q') {
         return false;
       }
     }
@@ -48,11 +46,8 @@ export const isSafeToPlaceQueen = (
 };
 
 // Check if all queens are placed correctly
-export const checkWinCondition = (
-  board: Board,
-  size: number,
-  colorRegions: ColorRegions
-): boolean => {
+export const checkWinCondition = (board: Board): boolean => {
+  const size = board.length;
   const queensPerRow = Array(size).fill(0);
   const queensPerCol = Array(size).fill(0);
   const queensPerRegion: Record<string, number> = {};
@@ -63,13 +58,13 @@ export const checkWinCondition = (
 
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
-      if (board[row][col] === 'Q') {
+      if (board[row][col].value === 'Q') {
         // Increment row and column queen counts
         queensPerRow[row]++;
         queensPerCol[col]++;
 
         // Increment region queen count
-        const region = colorRegions[row][col];
+        const region = board[row][col].color;
         if (!queensPerRegion[region]) {
           queensPerRegion[region] = 0;
         }
@@ -135,11 +130,8 @@ const hasAdjacent = (rowPositions: number[]): boolean => {
 };
 
 // Utility function to find clashing queens
-export const getClashingQueens = (
-  board: Board,
-  size: number,
-  colorRegions: ColorRegions
-): Position[] => {
+export const getClashingQueens = (board: Board): Position[] => {
+  const size = board.length;
   const clashes: Position[] = [];
   const queensPerRow = Array(size).fill(0);
   const queensPerCol = Array(size).fill(0);
@@ -149,8 +141,8 @@ export const getClashingQueens = (
 
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
-      if (board[row][col] === 'Q') {
-        const region = colorRegions[row][col];
+      if (board[row][col].value === 'Q') {
+        const region = board[row][col].color;
 
         // Track queens in rows, columns, and regions
         queensPerRow[row]++;
@@ -171,7 +163,7 @@ export const getClashingQueens = (
   for (let row = 0; row < size; row++) {
     if (queensPerRow[row] > 1) {
       for (let col = 0; col < size; col++) {
-        if (board[row][col] === 'Q') clashes.push({ row, col });
+        if (board[row][col].value === 'Q') clashes.push({ row, col });
       }
     }
   }
@@ -179,7 +171,7 @@ export const getClashingQueens = (
   for (let col = 0; col < size; col++) {
     if (queensPerCol[col] > 1) {
       for (let row = 0; row < size; row++) {
-        if (board[row][col] === 'Q') clashes.push({ row, col });
+        if (board[row][col].value === 'Q') clashes.push({ row, col });
       }
     }
   }
@@ -188,7 +180,7 @@ export const getClashingQueens = (
     if (count > 1) {
       for (let row = 0; row < size; row++) {
         for (let col = 0; col < size; col++) {
-          if (colorRegions[row][col] === region && board[row][col] === 'Q')
+          if (board[row][col].color === region && board[row][col].value === 'Q')
             clashes.push({ row, col });
         }
       }

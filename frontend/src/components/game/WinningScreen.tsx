@@ -2,11 +2,20 @@ import React from 'react';
 import Image from 'next/image';
 
 import CloseIcon from '@/components/icons/CloseIcon';
+import { Button } from '@/components/ui/button';
 import { formatDuration } from '@/lib/utils';
 import goldCrown from '@/assets/gold-crown.svg';
 import goldenChicletBg from '@/assets/golden-chiclet-bg.svg';
 
-const WinningScreen = ({ timer, close }: { timer: number; close: () => void }) => {
+const WinningScreen = ({
+  timer,
+  close,
+  onRefetch,
+}: {
+  timer: number;
+  close: () => void;
+  onRefetch?: () => Promise<void>;
+}) => {
   return (
     <div
       className={`bg-purple absolute flex w-72 flex-col items-center justify-center rounded-lg text-center text-xl text-white ${
@@ -38,6 +47,11 @@ const WinningScreen = ({ timer, close }: { timer: number; close: () => void }) =
               <div className="text-sm font-medium">Solve Time</div>
             </div>
           </div>
+        )}
+        {onRefetch && (
+          <Button onClick={onRefetch} className="mt-2 bg-white text-black hover:bg-gray-100">
+            Try Another Level
+          </Button>
         )}
       </div>
     </div>

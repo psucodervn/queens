@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import ClockIcon from '@/components/icons/ClockIcon';
 import { formatDuration } from '@/lib/utils';
@@ -6,42 +6,7 @@ import { formatDuration } from '@/lib/utils';
 const ONE_HOUR_IN_SECONDS = 3600;
 const TEN_HOURS_IN_SECONDS = 36000;
 
-const Timer = ({
-  isGameWon,
-  onTimeUpdate,
-  showTimer,
-  className = '',
-}: {
-  isGameWon: boolean;
-  onTimeUpdate: (seconds: number) => void;
-  showTimer: boolean;
-  className?: string;
-}) => {
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined = undefined;
-    if (!isGameWon) {
-      interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-          const newTime = prevSeconds + 1;
-          return newTime;
-        });
-      }, 1000);
-    } else if (isGameWon) {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [isGameWon]);
-
-  useEffect(() => {
-    onTimeUpdate(seconds);
-  }, [seconds]);
-
-  if (!showTimer) {
-    return <></>;
-  }
-
+const Timer = ({ seconds, className = '' }: { seconds: number; className?: string }) => {
   return (
     <div className={`flex items-center space-x-1 font-medium ${className}`}>
       <ClockIcon />
