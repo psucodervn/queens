@@ -1,31 +1,31 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from 'react'
+import Link from 'next/link'
 
-import { useAuth } from '@/lib/auth-context';
-import { getErrorMessage } from '@/lib/utils';
+import { useAuth } from '@/lib/auth-context'
+import { getErrorMessage } from '@/lib/utils'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     try {
-      await login(email, password);
+      await login(email, password)
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -110,5 +110,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,11 +1,11 @@
-import { Level } from './game/logic';
+import { Level } from './game/logic'
 
-const API_BASE_URL = 'http://localhost:8090/api';
+const API_BASE_URL = 'http://localhost:8090/api'
 
 export async function getRandomLevel(): Promise<Level> {
-  const response = await fetch(`${API_BASE_URL}/levels/random`);
+  const response = await fetch(`${API_BASE_URL}/levels/random`)
   if (!response.ok) {
-    throw new Error('Failed to fetch random level');
+    throw new Error('Failed to fetch random level')
   }
-  return response.json();
+  return response.json()
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const EraserIcon = ({ size = '16' }) => {
   return (
@@ -18,7 +18,7 @@ const EraserIcon = ({ size = '16' }) => {
       <path d="M22 21H7" />
       <path d="m5 11 9 9" />
     </svg>
-  );
-};
+  )
+}
 
-export default EraserIcon;
+export default EraserIcon

@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
 
 type LeaderboardEntry = {
-  rank: number;
-  username: string;
-  points: number;
-  fastestTime: string;
-  gamesWon: number;
-};
+  rank: number
+  username: string
+  points: number
+  fastestTime: string
+  gamesWon: number
+}
 
 export default function LeaderboardPage() {
-  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'all-time'>('weekly');
+  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'all-time'>('weekly')
 
   // Mock data - replace with actual API call
   const leaderboardData: LeaderboardEntry[] = [
@@ -20,7 +20,7 @@ export default function LeaderboardPage() {
     { rank: 3, username: 'PuzzleKing', points: 2100, fastestTime: '2:00', gamesWon: 38 },
     { rank: 4, username: 'BoardWizard', points: 1900, fastestTime: '2:15', gamesWon: 35 },
     { rank: 5, username: 'StrategyPro', points: 1800, fastestTime: '2:20', gamesWon: 33 },
-  ];
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
@@ -102,5 +102,5 @@ export default function LeaderboardPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

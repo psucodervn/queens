@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
-import LevelBoard from '@/components/game/Level';
-import { getRandomLevel } from '@/lib/api';
-import { Level } from '@/lib/game/logic';
+import LevelBoard from '@/components/game/Level'
+import { getRandomLevel } from '@/lib/api'
+import { Level } from '@/lib/game/logic'
 
 export default function Practice() {
-  const [level, setLevel] = useState<Level | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [level, setLevel] = useState<Level | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchLevel = async () => {
     try {
-      const randomLevel = await getRandomLevel();
-      setLevel(randomLevel);
+      const randomLevel = await getRandomLevel()
+      setLevel(randomLevel)
     } catch (err) {
-      setError('Failed to load level. Please try again.');
-      console.error('Error fetching level:', err);
+      setError('Failed to load level. Please try again.')
+      console.error('Error fetching level:', err)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchLevel();
-  }, []);
+    fetchLevel()
+  }, [])
 
   if (error) {
     return (
@@ -37,7 +37,7 @@ export default function Practice() {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   if (!level) {
@@ -47,12 +47,12 @@ export default function Practice() {
           <p>Loading level...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div>
       <LevelBoard id="random" level={level} onRefetch={fetchLevel} />
     </div>
-  );
+  )
 }

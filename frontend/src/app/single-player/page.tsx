@@ -1,54 +1,54 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 export default function SinglePlayerPage() {
-  const [boardSize, setBoardSize] = useState(8);
-  const [board, setBoard] = useState<number[][]>([]);
-  const [timer, setTimer] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
+  const [boardSize, setBoardSize] = useState(8)
+  const [board, setBoard] = useState<number[][]>([])
+  const [timer, setTimer] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
 
   // Initialize board
   useEffect(() => {
-    generateNewBoard();
-  }, [boardSize]);
+    generateNewBoard()
+  }, [boardSize])
 
   // Timer logic
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (isRunning) {
       interval = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
+        setTimer((prev) => prev + 1)
+      }, 1000)
     }
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    return () => clearInterval(interval)
+  }, [isRunning])
 
   const generateNewBoard = () => {
     const newBoard = Array(boardSize)
       .fill(null)
-      .map(() => Array(boardSize).fill(0));
-    setBoard(newBoard);
-    setTimer(0);
-    setIsRunning(true);
-  };
+      .map(() => Array(boardSize).fill(0))
+    setBoard(newBoard)
+    setTimer(0)
+    setIsRunning(true)
+  }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const toggleQueen = (row: number, col: number) => {
-    const newBoard = [...board];
-    newBoard[row][col] = newBoard[row][col] === 1 ? 0 : 1;
-    setBoard(newBoard);
-  };
+    const newBoard = [...board]
+    newBoard[row][col] = newBoard[row][col] === 1 ? 0 : 1
+    setBoard(newBoard)
+  }
 
   const checkSolution = () => {
     // TODO: Implement solution checking logic
-    setIsRunning(false);
-  };
+    setIsRunning(false)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6">
@@ -99,7 +99,7 @@ export default function SinglePlayerPage() {
                     (rowIndex + colIndex) % 2 === 0 ? 'bg-gray-200' : 'bg-gray-100'
                   } ${cell === 1 ? 'bg-yellow-400' : ''} hover:bg-yellow-200`}
                 />
-              ))
+              )),
             )}
           </div>
         </div>
@@ -112,5 +112,5 @@ export default function SinglePlayerPage() {
         </button>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function HomePage() {
   // Mock user data - replace with actual data from your backend
@@ -9,7 +9,7 @@ export default function HomePage() {
     fastestTime: '2:45',
     gamesPlayed: 15,
     winRate: '75%',
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
@@ -67,5 +67,5 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

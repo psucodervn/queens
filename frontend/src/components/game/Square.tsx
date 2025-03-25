@@ -1,16 +1,16 @@
-import React, { PointerEventHandler } from 'react';
+import React, { PointerEventHandler } from 'react'
 
-import { BoardItemValue } from '@/lib/game/board';
-import Cross from './Cross';
-import Queen from './Queen';
+import { BoardItemValue } from '@/lib/game/board'
+import Cross from './Cross'
+import Queen from './Queen'
 
 interface SquareProps {
-  value: BoardItemValue;
-  color: string;
-  onPointerDown: PointerEventHandler<HTMLElement>;
-  onPointerEnter: PointerEventHandler<HTMLElement>;
-  onPointerUp: PointerEventHandler<HTMLElement>;
-  isClashing: boolean;
+  value: BoardItemValue
+  color: string
+  onPointerDown: PointerEventHandler<HTMLElement>
+  onPointerEnter: PointerEventHandler<HTMLElement>
+  onPointerUp: PointerEventHandler<HTMLElement>
+  isClashing: boolean
 }
 
 // Square component with color regions and toggling between 'X', 'Q', and empty
@@ -40,7 +40,7 @@ const Square = ({
     >
       {value === 'Q' ? <Queen /> : value === 'X' ? <Cross /> : value}
     </div>
-  );
-};
+  )
+}
 
-export default Square;
+export default Square

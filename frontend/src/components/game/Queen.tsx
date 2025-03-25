@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const Queen = ({ size = '24', className = '' }) => {
   return (
@@ -22,7 +22,7 @@ const Queen = ({ size = '24', className = '' }) => {
         </defs>
       </svg>
     </span>
-  );
-};
+  )
+}
 
-export default Queen;
+export default Queen

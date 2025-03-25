@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const Cross = () => {
   return (
@@ -17,7 +17,7 @@ const Cross = () => {
         ></path>
       </svg>
     </span>
-  );
-};
+  )
+}
 
-export default Cross;
+export default Cross

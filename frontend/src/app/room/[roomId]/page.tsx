@@ -1,72 +1,72 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 
 type Player = {
-  id: string;
-  username: string;
-  isReady: boolean;
-  score: number;
-};
+  id: string
+  username: string
+  isReady: boolean
+  score: number
+}
 
 export default function RoomPage() {
-  const { roomId } = useParams();
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [boardSize] = useState(8);
-  const [board, setBoard] = useState<number[][]>([]);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
-  const [timer, setTimer] = useState(0);
+  const { roomId } = useParams()
+  const [players, setPlayers] = useState<Player[]>([])
+  const [boardSize] = useState(8)
+  const [board, setBoard] = useState<number[][]>([])
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting')
+  const [timer, setTimer] = useState(0)
 
   // Mock data - replace with actual websocket connection
   useEffect(() => {
     setPlayers([
       { id: '1', username: 'Player 1', isReady: true, score: 0 },
       { id: '2', username: 'Player 2', isReady: false, score: 0 },
-    ]);
-    generateNewBoard();
-  }, []);
+    ])
+    generateNewBoard()
+  }, [])
 
   // Timer logic
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
     if (gameStatus === 'playing') {
       interval = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
+        setTimer((prev) => prev + 1)
+      }, 1000)
     }
-    return () => clearInterval(interval);
-  }, [gameStatus]);
+    return () => clearInterval(interval)
+  }, [gameStatus])
 
   const generateNewBoard = () => {
     const newBoard = Array(boardSize)
       .fill(null)
-      .map(() => Array(boardSize).fill(0));
-    setBoard(newBoard);
-  };
+      .map(() => Array(boardSize).fill(0))
+    setBoard(newBoard)
+  }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const toggleQueen = (row: number, col: number) => {
-    if (gameStatus !== 'playing') return;
-    const newBoard = [...board];
-    newBoard[row][col] = newBoard[row][col] === 1 ? 0 : 1;
-    setBoard(newBoard);
-  };
+    if (gameStatus !== 'playing') return
+    const newBoard = [...board]
+    newBoard[row][col] = newBoard[row][col] === 1 ? 0 : 1
+    setBoard(newBoard)
+  }
 
   const startGame = () => {
-    setGameStatus('playing');
-    setTimer(0);
-  };
+    setGameStatus('playing')
+    setTimer(0)
+  }
 
   const submitSolution = () => {
     // TODO: Implement solution validation and scoring
-    setGameStatus('finished');
-  };
+    setGameStatus('finished')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6">
@@ -135,7 +135,7 @@ export default function RoomPage() {
                         gameStatus === 'playing' ? 'hover:bg-yellow-200' : ''
                       }`}
                     />
-                  ))
+                  )),
                 )}
               </div>
 
@@ -152,5 +152,5 @@ export default function RoomPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

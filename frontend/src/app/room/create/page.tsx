@@ -1,36 +1,36 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CreateRoomPage() {
-  const router = useRouter();
+  const router = useRouter()
   const [formData, setFormData] = useState({
     boardSize: '8',
     maxPlayers: '4',
     rounds: '3',
     timeLimit: '300', // 5 minutes in seconds
-  });
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     // TODO: Implement room creation logic
     try {
       // Placeholder for API call
-      const roomId = 'test-room-123'; // This should come from the API
-      router.push(`/room/${roomId}`);
+      const roomId = 'test-room-123' // This should come from the API
+      router.push(`/room/${roomId}`)
     } catch (error) {
-      console.error('Failed to create room:', error);
+      console.error('Failed to create room:', error)
     }
-  };
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6">
@@ -125,5 +125,5 @@ export default function CreateRoomPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

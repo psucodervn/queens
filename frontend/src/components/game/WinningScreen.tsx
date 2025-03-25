@@ -1,20 +1,20 @@
-import React from 'react';
-import Image from 'next/image';
+import React from 'react'
+import Image from 'next/image'
 
-import CloseIcon from '@/components/icons/CloseIcon';
-import { Button } from '@/components/ui/button';
-import { formatDuration } from '@/lib/utils';
-import goldCrown from '@/assets/gold-crown.svg';
-import goldenChicletBg from '@/assets/golden-chiclet-bg.svg';
+import CloseIcon from '@/components/icons/CloseIcon'
+import { Button } from '@/components/ui/button'
+import { formatDuration } from '@/lib/utils'
+import goldCrown from '@/assets/gold-crown.svg'
+import goldenChicletBg from '@/assets/golden-chiclet-bg.svg'
 
 const WinningScreen = ({
   timer,
   close,
   onRefetch,
 }: {
-  timer: number;
-  close: () => void;
-  onRefetch?: () => Promise<void>;
+  timer: number
+  close: () => void
+  onRefetch?: () => Promise<void>
 }) => {
   return (
     <div
@@ -55,7 +55,7 @@ const WinningScreen = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WinningScreen;
+export default WinningScreen

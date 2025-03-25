@@ -1,20 +1,20 @@
-import SettingsIcon from '@/components/icons/SettingsIcon';
+import SettingsIcon from '@/components/icons/SettingsIcon'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
+} from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 
 interface SettingsDialogProps {
-  showClashingQueens: boolean;
-  toggleShowClashingQueens: () => void;
-  autoPlaceXs: boolean;
-  toggleAutoPlaceXs: () => void;
-  showClock: boolean;
-  toggleShowClock: () => void;
+  showClashingQueens: boolean
+  toggleShowClashingQueens: () => void
+  autoPlaceXs: boolean
+  toggleAutoPlaceXs: () => void
+  showClock: boolean
+  toggleShowClock: () => void
 }
 
 const SettingsDialog = ({
@@ -52,7 +52,7 @@ const SettingsDialog = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default SettingsDialog;
+export default SettingsDialog

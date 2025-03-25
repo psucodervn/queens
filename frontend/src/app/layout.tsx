@@ -1,17 +1,17 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 
-import { NavigationHeader } from '@/components/layout/navigation-header';
-import { AuthProvider } from '@/lib/auth-context';
+import { NavigationHeader } from '@/components/layout/navigation-header'
+import { AuthProvider } from '@/lib/auth-context'
 
-import './globals.css';
+import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Queens Puzzle',
   description: 'Multiplayer Queens puzzle game',
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,5 +23,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

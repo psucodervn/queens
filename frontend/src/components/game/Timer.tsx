@@ -1,10 +1,10 @@
-import React from 'react';
+import React from 'react'
 
-import ClockIcon from '@/components/icons/ClockIcon';
-import { formatDuration } from '@/lib/utils';
+import ClockIcon from '@/components/icons/ClockIcon'
+import { formatDuration } from '@/lib/utils'
 
-const ONE_HOUR_IN_SECONDS = 3600;
-const TEN_HOURS_IN_SECONDS = 36000;
+const ONE_HOUR_IN_SECONDS = 3600
+const TEN_HOURS_IN_SECONDS = 36000
 
 const Timer = ({ seconds, className = '' }: { seconds: number; className?: string }) => {
   return (
@@ -22,7 +22,7 @@ const Timer = ({ seconds, className = '' }: { seconds: number; className?: strin
         {formatDuration(seconds)}
       </span>
     </div>
-  );
-};
+  )
+}
 
-export default Timer;
+export default Timer
