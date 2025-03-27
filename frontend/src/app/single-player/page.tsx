@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function SinglePlayerPage() {
   const [boardSize, setBoardSize] = useState(8)
@@ -8,10 +8,19 @@ export default function SinglePlayerPage() {
   const [timer, setTimer] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
 
+  const generateNewBoard = useCallback(() => {
+    const newBoard = Array(boardSize)
+      .fill(null)
+      .map(() => Array(boardSize).fill(0))
+    setBoard(newBoard)
+    setTimer(0)
+    setIsRunning(true)
+  }, [boardSize])
+
   // Initialize board
   useEffect(() => {
     generateNewBoard()
-  }, [boardSize])
+  }, [generateNewBoard])
 
   // Timer logic
   useEffect(() => {
@@ -23,15 +32,6 @@ export default function SinglePlayerPage() {
     }
     return () => clearInterval(interval)
   }, [isRunning])
-
-  const generateNewBoard = () => {
-    const newBoard = Array(boardSize)
-      .fill(null)
-      .map(() => Array(boardSize).fill(0))
-    setBoard(newBoard)
-    setTimer(0)
-    setIsRunning(true)
-  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
