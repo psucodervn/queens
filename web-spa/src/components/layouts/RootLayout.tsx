@@ -16,7 +16,7 @@ export default function Layout() {
   return (
     <div className='min-h-screen bg-background w-full'>
       <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        <div className='flex h-14 items-center px-4 md:px-6 lg:px-8'>
+        <div className='flex h-14 items-center px-4 md:px-6 lg:px-8 justify-between'>
           {/* Logo */}
           <div className='mr-4 flex'>
             <Link to='/' className='mr-6 flex items-center space-x-2'>
@@ -26,8 +26,8 @@ export default function Layout() {
 
           {/* Mobile Menu */}
           <Sheet>
-            <SheetTrigger asChild className='md:hidden'>
-              <Button variant='ghost' size='icon'>
+            <SheetTrigger asChild className='sm:hidden'>
+              <Button variant='ghost' size='icon' className='border'>
                 <Menu className='h-5 w-5' />
                 <span className='sr-only'>Toggle menu</span>
               </Button>
@@ -51,7 +51,7 @@ export default function Layout() {
           </Sheet>
 
           {/* Desktop Navigation Items */}
-          <div className='hidden md:flex flex-1 items-center justify-center space-x-6'>
+          <div className='hidden sm:flex flex-1 items-center justify-center space-x-6'>
             <NavLink to='/practice' className='text-sm font-medium transition-colors hover:text-primary'>
               Practice
             </NavLink>
@@ -61,13 +61,15 @@ export default function Layout() {
           </div>
 
           {/* User Profile */}
-          <div className='flex items-center justify-end space-x-4'>
+          <div className='items-center justify-end space-x-4 hidden sm:flex'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
                   <Avatar className='h-8 w-8'>
-                    <AvatarImage src='/avatars/01.png' alt='User avatar' />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarImage src='/profile.svg' alt='User avatar' />
+                    <AvatarFallback>
+                      <img src='/profile.svg' alt='User avatar' />
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>

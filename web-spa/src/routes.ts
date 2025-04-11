@@ -1,12 +1,12 @@
 import Practice from '@/pages/practice/Practice'
 import Rooms from '@/pages/rooms/Rooms'
 import { createBrowserRouter } from 'react-router-dom'
+import RootLayout from './components/layouts/RootLayout'
 import Home from './pages/home/Home'
-import Layout from './pages/layout'
 
 export const routes = [
   {
-    Component: Layout,
+    Component: RootLayout,
     children: [
       {
         path: '/',
