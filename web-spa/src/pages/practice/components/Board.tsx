@@ -48,7 +48,7 @@ const GameBoard = ({ board, onSquareClick }: BoardProps) => {
   return (
     <div
       ref={boardRef}
-      className='grid touch-none user-select-none w-fit border-2 border-black'
+      className='grid touch-none user-select-none w-fit border-r-2 border-b-2 border-t border-l border-black'
       style={{
         gridTemplateColumns: `repeat(${boardSize}, ${gridSize})`,
         gridTemplateRows: `repeat(${boardSize}, ${gridSize})`,
