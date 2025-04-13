@@ -9,6 +9,7 @@ export type GameState = {
   hasWon: boolean
   elapsedTime: number
   autoMarkX: boolean
+  showClashingQueens: boolean
   history: Board[]
 }
 
@@ -33,6 +34,9 @@ export type GameStateAction =
       type: 'TOGGLE_AUTO_MARK_X'
     }
   | {
+      type: 'TOGGLE_SHOW_CLASHING_QUEENS'
+    }
+  | {
       type: 'UNDO'
     }
 
@@ -45,7 +49,8 @@ function createInitialGameState(level: Level): GameState {
     level,
     hasWon: false,
     elapsedTime: 0,
-    autoMarkX: false,
+    autoMarkX: true,
+    showClashingQueens: true,
     history: [structuredClone(board)],
   }
 }
@@ -71,6 +76,8 @@ function gameStateReducer(state: GameState, action: GameStateAction): GameState 
       return handleSquareClick(state, action.row, action.col)
     case 'TOGGLE_AUTO_MARK_X':
       return { ...state, autoMarkX: !state.autoMarkX }
+    case 'TOGGLE_SHOW_CLASHING_QUEENS':
+      return { ...state, showClashingQueens: !state.showClashingQueens }
     case 'UNDO':
       if (state.history.length <= 1) return state
       newHistory = [...state.history]

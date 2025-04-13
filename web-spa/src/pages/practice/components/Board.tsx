@@ -1,5 +1,6 @@
 import useGridSize from '@/hooks/useGridSize'
 import { Board } from '@/lib/game/board'
+import { getClashingQueens } from '@/lib/game/logic'
 import { cn } from '@/lib/utils'
 import { useRef, useState } from 'react'
 import Cross from './Cross'
@@ -8,13 +9,17 @@ import Queen from './Queen'
 interface BoardProps {
   board: Board
   onSquareClick: (row: number, col: number) => void
+  showClashingQueens?: boolean
 }
 
-const GameBoard = ({ board, onSquareClick }: BoardProps) => {
+const GameBoard = ({ board, onSquareClick, showClashingQueens = false }: BoardProps) => {
   const boardSize = board.length
   const { gridSize } = useGridSize(boardSize)
   const [isDragging, setIsDragging] = useState(false)
   const boardRef = useRef<HTMLDivElement>(null)
+
+  // Get clashing queens positions if the feature is enabled
+  const clashingQueens = showClashingQueens ? getClashingQueens(board) : []
 
   function borderClasses(rowIndex: number, colIndex: number) {
     return cn(
@@ -45,6 +50,11 @@ const GameBoard = ({ board, onSquareClick }: BoardProps) => {
     setIsDragging(false)
   }
 
+  // Check if a square is part of a clashing queen
+  const isClashingQueen = (row: number, col: number) => {
+    return clashingQueens.some((pos) => pos.row === row && pos.col === col)
+  }
+
   return (
     <div
       ref={boardRef}
@@ -63,6 +73,7 @@ const GameBoard = ({ board, onSquareClick }: BoardProps) => {
             className={cn(
               'hover:brightness-75 box-border flex h-full items-center justify-center cursor-pointer text-[24px] border-t border-l border-black',
               borderClasses(rowIndex, colIndex),
+              isClashingQueen(rowIndex, colIndex) && 'text-red-500',
             )}
             onPointerDown={() => handlePointerDown(rowIndex, colIndex)}
             onPointerEnter={() => handlePointerEnter(rowIndex, colIndex)}

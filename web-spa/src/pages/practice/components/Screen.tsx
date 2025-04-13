@@ -36,6 +36,10 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
     dispatch({ type: 'UNDO' })
   }
 
+  function handleToggleShowClashingQueens() {
+    dispatch({ type: 'TOGGLE_SHOW_CLASHING_QUEENS' })
+  }
+
   return (
     <TooltipProvider>
       <div className='flex flex-col items-center justify-center pt-4 select-none'>
@@ -62,8 +66,8 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
                   </Tooltip>
 
                   <SettingsDialog
-                    showClashingQueens={false}
-                    toggleShowClashingQueens={() => {}}
+                    showClashingQueens={state.showClashingQueens}
+                    toggleShowClashingQueens={handleToggleShowClashingQueens}
                     autoPlaceXs={state.autoMarkX}
                     toggleAutoPlaceXs={handleToggleAutoMarkX}
                     showClock={true}
@@ -74,7 +78,11 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
             </div>
 
             <div className='game relative'>
-              <GameBoard board={state.board} onSquareClick={handleSquareClick} />
+              <GameBoard
+                board={state.board}
+                onSquareClick={handleSquareClick}
+                showClashingQueens={state.showClashingQueens}
+              />
             </div>
 
             <div className='flex justify-center mt-4 w-full space-x-2'>
