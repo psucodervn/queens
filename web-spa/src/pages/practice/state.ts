@@ -9,6 +9,7 @@ export type GameState = {
   hasWon: boolean
   elapsedTime: number
   autoMarkX: boolean
+  history: Board[]
 }
 
 export type GameStateAction =
@@ -31,6 +32,9 @@ export type GameStateAction =
   | {
       type: 'TOGGLE_AUTO_MARK_X'
     }
+  | {
+      type: 'UNDO'
+    }
 
 function createInitialGameState(level: Level): GameState {
   const board = createEmptyBoard(level.colorRegions, level.regionColors)
@@ -41,22 +45,42 @@ function createInitialGameState(level: Level): GameState {
     level,
     hasWon: false,
     elapsedTime: 0,
-    autoMarkX: true,
+    autoMarkX: false,
+    history: [structuredClone(board)],
   }
 }
 
 function gameStateReducer(state: GameState, action: GameStateAction): GameState {
+  let emptyBoard: Board
+  let newHistory: Board[]
+  let previousBoard: Board
+
   switch (action.type) {
     case 'INITIALIZE':
       return createInitialGameState(action.level)
     case 'SET_BOARD':
       return { ...state, board: action.board }
     case 'RESET_BOARD':
-      return { ...state, board: createEmptyBoard(state.level.colorRegions, state.level.regionColors) }
+      emptyBoard = createEmptyBoard(state.level.colorRegions, state.level.regionColors)
+      return {
+        ...state,
+        board: emptyBoard,
+        history: [structuredClone(emptyBoard)],
+      }
     case 'CLICK_SQUARE':
       return handleSquareClick(state, action.row, action.col)
     case 'TOGGLE_AUTO_MARK_X':
       return { ...state, autoMarkX: !state.autoMarkX }
+    case 'UNDO':
+      if (state.history.length <= 1) return state
+      newHistory = [...state.history]
+      newHistory.pop() // Remove current state
+      previousBoard = newHistory[newHistory.length - 1]
+      return {
+        ...state,
+        board: structuredClone(previousBoard),
+        history: newHistory,
+      }
     default:
       return state
   }
@@ -74,11 +98,20 @@ function handleSquareClick(state: GameState, row: number, col: number) {
     removeQueen(newBoard, row, col)
   }
 
+  // Save the current state to history before applying changes
+  const newHistory = [...state.history, structuredClone(newBoard)]
+
   if (checkWinCondition(newBoard)) {
-    return { ...state, board: newBoard, hasWon: true, elapsedTime: Date.now() - state.startTime }
+    return {
+      ...state,
+      board: newBoard,
+      hasWon: true,
+      elapsedTime: Date.now() - state.startTime,
+      history: newHistory,
+    }
   }
 
-  return { ...state, board: newBoard }
+  return { ...state, board: newBoard, history: newHistory }
 }
 
 export const useGameState = (level: Level) => {

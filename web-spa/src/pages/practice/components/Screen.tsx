@@ -1,6 +1,7 @@
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Level } from '@/lib/game/logic'
-import { Eraser, RefreshCw } from 'lucide-react'
+import { RefreshCw, Undo2, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { useGameState } from '../state'
 import GameBoard from './Board'
@@ -31,6 +32,10 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
     dispatch({ type: 'TOGGLE_AUTO_MARK_X' })
   }
 
+  function handleUndo() {
+    dispatch({ type: 'UNDO' })
+  }
+
   return (
     <TooltipProvider>
       <div className='flex flex-col items-center justify-center pt-4 select-none'>
@@ -53,23 +58,11 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
                         <RefreshCw size='18' />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>New Level</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={handleErase}
-                        className='mr-2 rounded-full border border-slate-500 p-2 cursor-pointer'
-                      >
-                        <Eraser size='18' />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>Clear Board</TooltipContent>
+                    <TooltipContent>New Game</TooltipContent>
                   </Tooltip>
 
                   <SettingsDialog
-                    showClashingQueens={true}
+                    showClashingQueens={false}
                     toggleShowClashingQueens={() => {}}
                     autoPlaceXs={state.autoMarkX}
                     toggleAutoPlaceXs={handleToggleAutoMarkX}
@@ -82,6 +75,43 @@ const Screen = ({ level, onRandomize }: ScreenProps) => {
 
             <div className='game relative'>
               <GameBoard board={state.board} onSquareClick={handleSquareClick} />
+            </div>
+
+            <div className='flex justify-center mt-4 w-full space-x-2'>
+              <div className='w-1/2'>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={handleUndo}
+                      disabled={state.history.length <= 1}
+                      className='flex items-center gap-1 w-full'
+                    >
+                      <Undo2 size={16} />
+                      <span>Undo</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo Last Move</TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className='w-1/2'>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={handleErase}
+                      className='flex items-center gap-1 w-full'
+                    >
+                      <X size={16} />
+                      <span>Clear</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Clear Board</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </div>
