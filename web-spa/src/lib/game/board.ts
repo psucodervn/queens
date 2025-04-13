@@ -73,8 +73,11 @@ export const getQueenPositionForGivenX = (xRow: number, xCol: number, newBoard: 
   return null // No queens require this 'X' cell
 }
 
-export const placeQueen = (newBoard: Board, row: number, col: number) => {
+export const placeQueen = (newBoard: Board, row: number, col: number, autoMarkX: boolean = false) => {
   newBoard[row][col].value = 'Q' // Place the queen
+  if (!autoMarkX) {
+    return
+  }
 
   const newXs: number[][] = []
   const directions = [

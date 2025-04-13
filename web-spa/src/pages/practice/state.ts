@@ -8,6 +8,7 @@ export type GameState = {
   startTime: number
   hasWon: boolean
   elapsedTime: number
+  autoMarkX: boolean
 }
 
 export type GameStateAction =
@@ -27,6 +28,9 @@ export type GameStateAction =
       row: number
       col: number
     }
+  | {
+      type: 'TOGGLE_AUTO_MARK_X'
+    }
 
 function createInitialGameState(level: Level): GameState {
   const board = createEmptyBoard(level.colorRegions, level.regionColors)
@@ -37,6 +41,7 @@ function createInitialGameState(level: Level): GameState {
     level,
     hasWon: false,
     elapsedTime: 0,
+    autoMarkX: true,
   }
 }
 
@@ -50,6 +55,8 @@ function gameStateReducer(state: GameState, action: GameStateAction): GameState 
       return { ...state, board: createEmptyBoard(state.level.colorRegions, state.level.regionColors) }
     case 'CLICK_SQUARE':
       return handleSquareClick(state, action.row, action.col)
+    case 'TOGGLE_AUTO_MARK_X':
+      return { ...state, autoMarkX: !state.autoMarkX }
     default:
       return state
   }
@@ -62,7 +69,7 @@ function handleSquareClick(state: GameState, row: number, col: number) {
   if (currentValue === ' ') {
     newBoard[row][col].value = 'X'
   } else if (currentValue === 'X') {
-    placeQueen(newBoard, row, col)
+    placeQueen(newBoard, row, col, state.autoMarkX)
   } else if (currentValue === 'Q') {
     removeQueen(newBoard, row, col)
   }
