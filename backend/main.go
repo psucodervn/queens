@@ -31,9 +31,18 @@ func main() {
 		se.Router.GET("/{path...}", apis.Static(os.DirFS("./dist"), true))
 
 		api := se.Router.Group("/api")
+
+		// Level endpoints
 		api.GET("/levels", getLevels)
 		api.GET("/levels/{id}", getLevel)
 		api.GET("/levels/random", getRandomLevel)
+
+		// Room endpoints
+		api.POST("/rooms", createRoom)
+		api.POST("/rooms/{roomId}/join", joinRoom)
+		api.POST("/rooms/{roomId}/leave", leaveRoom)
+		api.GET("/rooms/{roomId}", getRoom)
+		api.GET("/rooms", listRooms)
 
 		return se.Next()
 	})

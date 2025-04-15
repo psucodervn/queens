@@ -49,7 +49,7 @@ function createInitialGameState(level: Level): GameState {
     level,
     hasWon: false,
     elapsedTime: 0,
-    autoMarkX: true,
+    autoMarkX: false,
     showClashingQueens: true,
     history: [structuredClone(board)],
   }
@@ -69,6 +69,7 @@ function gameStateReducer(state: GameState, action: GameStateAction): GameState 
       emptyBoard = createEmptyBoard(state.level.colorRegions, state.level.regionColors)
       return {
         ...state,
+        hasWon: false,
         board: emptyBoard,
         history: [structuredClone(emptyBoard)],
       }
@@ -118,7 +119,7 @@ function handleSquareClick(state: GameState, row: number, col: number) {
     }
   }
 
-  return { ...state, board: newBoard, history: newHistory }
+  return { ...state, hasWon: false, board: newBoard, history: newHistory }
 }
 
 export const useGameState = (level: Level) => {
