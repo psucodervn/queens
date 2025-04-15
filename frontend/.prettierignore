@@ -1,7 +1,0 @@
-.next
-node_modules
-pnpm-lock.yaml
-public
-next-env.d.ts
-package-lock.json
-yarn.lock 
