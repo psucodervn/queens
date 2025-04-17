@@ -25,9 +25,9 @@ const SettingsDialog = ({
       <DialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button className='rounded-full border border-slate-500 p-2 hover:cursor-pointer'>
+            <div className='rounded-full border border-slate-500 p-2 hover:cursor-pointer'>
               <Settings size='18' />
-            </button>
+            </div>
           </TooltipTrigger>
           <TooltipContent>Settings</TooltipContent>
         </Tooltip>
