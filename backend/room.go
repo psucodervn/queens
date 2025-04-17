@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"slices"
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
@@ -37,7 +38,7 @@ func createRoom(e *core.RequestEvent) error {
 
 	// Create room using direct SQL query like getRandomLevel
 	_, err := e.App.DB().NewQuery("INSERT INTO rooms (name, maxPlayers, timeLimit, status, players, createdBy) VALUES ({:name}, {:maxPlayers}, {:timeLimit}, {:status}, {:players}, {:createdBy})").
-		Bind(map[string]interface{}{
+		Bind(map[string]any{
 			"name":       req.Name,
 			"maxPlayers": req.MaxPlayers,
 			"timeLimit":  req.TimeLimit,
@@ -74,10 +75,8 @@ func joinRoom(e *core.RequestEvent) error {
 	playerId := e.Request.Header.Get("Authorization")
 
 	// Check if player is already in the room
-	for _, p := range players {
-		if p == playerId {
-			return e.JSON(http.StatusOK, room)
-		}
+	if slices.Contains(players, playerId) {
+		return e.JSON(http.StatusOK, room)
 	}
 
 	// Check if room is full
@@ -87,7 +86,7 @@ func joinRoom(e *core.RequestEvent) error {
 
 	// Add player to room using direct SQL query
 	_, err = e.App.DB().NewQuery("UPDATE rooms SET players = {:players} WHERE id = {:id}").
-		Bind(map[string]interface{}{
+		Bind(map[string]any{
 			"players": append(players, playerId),
 			"id":      roomId,
 		}).
@@ -129,7 +128,7 @@ func leaveRoom(e *core.RequestEvent) error {
 
 	// Update players using direct SQL query
 	_, err = e.App.DB().NewQuery("UPDATE rooms SET players = {:players} WHERE id = {:id}").
-		Bind(map[string]interface{}{
+		Bind(map[string]any{
 			"players": newPlayers,
 			"id":      roomId,
 		}).

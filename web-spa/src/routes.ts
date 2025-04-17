@@ -1,8 +1,9 @@
 import Practice from '@/pages/practice/Practice'
-import Rooms from '@/pages/rooms/Rooms'
 import { createBrowserRouter } from 'react-router-dom'
 import RootLayout from './components/layouts/RootLayout'
 import Home from './pages/home/Home'
+import MultiplayerPage from './pages/multiplayer'
+import RoomDetailPage from './pages/rooms/[id]'
 
 export const routes = [
   {
@@ -17,8 +18,12 @@ export const routes = [
         Component: Practice,
       },
       {
-        path: '/rooms/:roomId',
-        Component: Rooms,
+        path: '/multiplayer',
+        Component: MultiplayerPage,
+      },
+      {
+        path: '/rooms/:id',
+        Component: RoomDetailPage,
       },
     ],
   },
