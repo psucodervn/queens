@@ -11,12 +11,21 @@ export default function MultiplayerPage() {
 
   useEffect(() => {
     loadRooms()
+
+    pb.collection('rooms').subscribe('*', () => {
+      loadRooms()
+    })
+
+    return () => {
+      pb.collection('rooms').unsubscribe()
+    }
   }, [])
 
   const loadRooms = async () => {
     try {
       const records = await pb.collection('rooms').getList(1, 50, {
-        sort: '-created',
+        sort: '-updated',
+        filter: 'players:length > 0',
       })
       setRooms(records.items as GameRoom[])
     } catch (error) {
@@ -68,7 +77,7 @@ export default function MultiplayerPage() {
               </CardHeader>
               <CardContent>
                 <p>
-                  Players: {room.players}/{room.maxPlayers}
+                  Players: {room.players.length}/{room.maxPlayers}
                 </p>
               </CardContent>
             </Card>
