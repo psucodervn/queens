@@ -1,4 +1,5 @@
-import { Client, Room } from "@colyseus/core";
+import { JWT } from "@colyseus/auth";
+import { AuthContext, Client, Room } from "@colyseus/core";
 import { Player, QueenRoomState } from "./schema/QueenRoomState";
 
 interface QueenRoomMetadata {
@@ -10,13 +11,23 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   autoDispose: boolean = false;
   state = new QueenRoomState();
 
-  onCreate(options: any) {
-    this.onMessage("type", (client, message) => {
-      //
-      // handle "type" message
-      //
-    });
+  static async onAuth(
+    token: string,
+    options: any,
+    context: AuthContext
+  ): Promise<unknown> {
+    // validate the token
+    const userdata: any = await JWT.verify(token);
 
+    if (userdata.anonymous) {
+      userdata.id = userdata.id || userdata.anonymousId;
+    }
+
+    // return userdata
+    return userdata;
+  }
+
+  onCreate(options: any) {
     this.setMetadata({
       displayName: options.roomName,
     });
@@ -26,14 +37,16 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, options, "joined!");
 
-    const { name } = options;
-    const player = new Player(name);
-    this.state.players.set(client.sessionId, player);
+    const player = new Player(client.auth.username);
+    this.state.players.set(client.auth.id, player);
   }
 
   async onLeave(client: Client, consented: boolean) {
     // flag client as inactive for other users
-    this.state.players.get(client.sessionId).connected = false;
+    this.state.players.get(client.auth.id).connected = false;
+
+    this.state.players.delete(client.auth.id);
+    return;
 
     try {
       if (consented) {
@@ -44,10 +57,10 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       await this.allowReconnection(client, 10);
 
       // client returned! let's re-activate it.
-      this.state.players.get(client.sessionId).connected = true;
+      this.state.players.get(client.auth.id).connected = true;
     } catch (e) {
       // 20 seconds expired. let's remove the client.
-      this.state.players.delete(client.sessionId);
+      this.state.players.delete(client.auth.id);
     }
   }
 

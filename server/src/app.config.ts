@@ -1,3 +1,4 @@
+import { auth } from "@colyseus/auth";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
 import config from "@colyseus/tools";
@@ -44,6 +45,12 @@ export default config({
      * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
      */
     app.use("/monitor", monitor());
+
+    /**
+     * Use @colyseus/auth
+     * Read more: https://docs.colyseus.io/auth/module
+     */
+    app.use(auth.prefix, auth.routes());
   },
 
   beforeListen: () => {

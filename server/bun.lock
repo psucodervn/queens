@@ -4,6 +4,7 @@
     "": {
       "name": "my-app",
       "dependencies": {
+        "@colyseus/auth": "^0.16.6",
         "@colyseus/monitor": "^0.16.0",
         "@colyseus/playground": "^0.16.0",
         "@colyseus/tools": "^0.16.0",

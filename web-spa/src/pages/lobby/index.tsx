@@ -40,20 +40,15 @@ export default function LobbyPage() {
   const navigate = useNavigate()
 
   async function setupLobby() {
-    console.log('Attempting to connect to lobby room...')
     const lobby = await client.joinOrCreate('lobby')
-    console.log('Successfully connected to lobby room')
     setConnectionStatus('Connected')
 
     lobby.onMessage('rooms', (rooms: RoomAvailable[]) => {
-      console.log('Received rooms update:', rooms)
       setRooms(rooms)
     })
 
     lobby.onMessage('+', ([newRoomId, newRoom]) => {
-      console.log('Room added:', { newRoomId, newRoom })
       setRooms((currentRooms) => {
-        console.log('Current rooms in update:', currentRooms)
         const roomIndex = currentRooms.findIndex((room) => room.roomId === newRoomId)
         if (roomIndex !== -1) {
           return currentRooms.map((room) => (room.roomId === newRoomId ? newRoom : room))
@@ -64,9 +59,7 @@ export default function LobbyPage() {
     })
 
     lobby.onMessage('-', (roomId) => {
-      console.log('Room removed:', { roomId })
       setRooms((currentRooms) => {
-        console.log('Current rooms in removal:', currentRooms)
         return currentRooms.filter((room) => room.roomId !== roomId)
       })
     })
@@ -81,9 +74,12 @@ export default function LobbyPage() {
       setConnectionStatus(`Error: ${message}`)
     })
 
-    lobby.onLeave((code) => {
-      console.log('Left lobby:', code)
+    lobby.onLeave(() => {
       setConnectionStatus('Disconnected')
+    })
+
+    lobby.onMessage('*', (message) => {
+      console.log('Lobby message:', message)
     })
 
     return lobby
@@ -92,13 +88,10 @@ export default function LobbyPage() {
   useEffect(() => {
     const req = setupLobby()
 
-    req.then(() => {
-      console.log('Lobby setup completed')
-    })
+    req.then(() => {})
 
     return () => {
       req.then((lobby) => {
-        console.log('Leaving lobby')
         lobby.leave()
       })
     }
