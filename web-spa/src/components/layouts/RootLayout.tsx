@@ -38,6 +38,9 @@ export default function Layout() {
                 <a href='/multiplayer' className='text-sm font-medium transition-colors hover:text-primary'>
                   Multiplayer
                 </a>
+                <a href='/lobby' className='text-sm font-medium transition-colors hover:text-primary'>
+                  Lobby
+                </a>
               </nav>
             </SheetContent>
           </Sheet>
@@ -49,6 +52,9 @@ export default function Layout() {
             </NavLink>
             <NavLink to='/multiplayer' className='text-sm font-medium transition-colors hover:text-primary'>
               Multiplayer
+            </NavLink>
+            <NavLink to='/lobby' className='text-sm font-medium transition-colors hover:text-primary'>
+              Lobby
             </NavLink>
           </div>
 

@@ -5,18 +5,20 @@ import config from "@colyseus/tools";
 /**
  * Import your Room files
  */
-import { LobbyRoom } from "colyseus";
+import { LobbyRoom, RedisDriver, RedisPresence } from "colyseus";
 import { QueenRoom } from "./rooms/QueenRoom";
+import { TangoRoom } from "./rooms/TangoRoom";
 
 export default config({
   initializeGameServer: (gameServer) => {
     // Expose the LobbyRoom
-    gameServer.define("lobby_room", LobbyRoom);
+    gameServer.define("lobby", LobbyRoom);
 
     /**
      * Define your room handlers:
      */
-    gameServer.define("queen_room", QueenRoom).enableRealtimeListing();
+    gameServer.define("queen", QueenRoom).enableRealtimeListing();
+    gameServer.define("tango", TangoRoom).enableRealtimeListing();
   },
 
   initializeExpress: (app) => {
@@ -52,5 +54,13 @@ export default config({
 
   options: {
     devMode: process.env.DEV_MODE === "true",
+    presence: new RedisPresence({
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "12001"),
+    }),
+    driver: new RedisDriver({
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "12001"),
+    }),
   },
 });

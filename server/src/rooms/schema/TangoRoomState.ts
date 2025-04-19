@@ -2,16 +2,13 @@ import { MapSchema, Schema, type } from "@colyseus/schema";
 
 export class Player extends Schema {
   @type("string") name: string;
-  @type("boolean") connected: boolean;
 
   constructor(name: string) {
     super();
     this.name = name;
-    this.connected = true;
   }
 }
 
-export class QueenRoomState extends Schema {
-  @type("string") displayName: string;
+export class TangoRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
 }
