@@ -1,13 +1,14 @@
 import { JWT } from "@colyseus/auth";
 import { AuthContext, Client, Room } from "@colyseus/core";
-import { Player, QueenRoomState } from "./schema/QueenRoomState";
+import { levels } from "../game/levels";
+import { GameStatus, Player, QueenRoomState } from "./schema/QueenRoomState";
 
 interface QueenRoomMetadata {
   displayName: string;
 }
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
-  maxClients = 10;
+  maxClients = 20;
   autoDispose: boolean = false;
   state = new QueenRoomState();
 
@@ -32,6 +33,14 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       displayName: options.roomName,
     });
     this.state.displayName = options.roomName;
+    this.state.status = GameStatus.LOBBY;
+
+    this.onMessage("ready", (client, message) => {
+      this.state.players.get(client.auth.id).ready = message;
+    });
+
+    this.onMessage("new-game", this.onNewGame.bind(this));
+    this.onMessage("ready", this.onReady.bind(this));
   }
 
   onJoin(client: Client, options: any) {
@@ -61,6 +70,42 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     } catch (e) {
       // 20 seconds expired. let's remove the client.
       this.state.players.delete(client.auth.id);
+    }
+  }
+
+  onNewGame(client: Client, message: any) {
+    if (this.state.status !== GameStatus.LOBBY || this.state.players.size < 2) {
+      throw new Error("Game is not in lobby or not enough players");
+    }
+
+    // reset all players ready status
+    this.state.players.forEach((player, id) => {
+      player.ready = id === client.auth.id;
+    });
+
+    this.state.status = GameStatus.WAITING;
+  }
+
+  startGame() {
+    // pick a random level
+    const levelValues = Object.values(levels);
+    const randomLevel =
+      levelValues[Math.floor(Math.random() * levelValues.length)];
+
+    this.state.test = JSON.stringify(randomLevel);
+    this.state.status = GameStatus.PLAYING;
+  }
+
+  onReady(client: Client, message: any) {
+    this.state.players.get(client.auth.id).ready = message;
+
+    // check if all players are ready
+    const allPlayersReady = Array.from(this.state.players.values()).every(
+      (player) => player.ready
+    );
+
+    if (allPlayersReady) {
+      this.startGame();
     }
   }
 

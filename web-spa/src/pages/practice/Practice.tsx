@@ -20,7 +20,7 @@ export default function Practice() {
 
   return (
     <div>
-      <Screen level={level} onRandomize={handleRandomize} />
+      <Screen level={level} onRandomize={handleRandomize} hasToolbar />
     </div>
   )
 }

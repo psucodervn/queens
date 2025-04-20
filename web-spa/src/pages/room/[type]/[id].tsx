@@ -6,10 +6,30 @@ import { Room } from 'colyseus.js'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import GameBoard from './GameBoard'
+import RoomDetail from './RoomDetail'
 
 interface RoomMetadata {
   displayName: string
-  players: Map<string, unknown>
+  players: Map<string, PlayerData>
+  status: number
+  test: string
+}
+
+interface PlayerData {
+  name?: string
+  isHost?: boolean
+  connected?: boolean
+  ready?: boolean
+  [key: string]: unknown
+}
+
+interface Player {
+  id: string
+  name: string
+  isHost?: boolean
+  connected?: boolean
+  ready?: boolean
 }
 
 interface RoomState {
@@ -35,8 +55,9 @@ interface ColyseusRoom extends Room {
 export default function RoomDetailPage() {
   const { type, id } = useParams()
   const [room, setRoom] = useState<RoomState | null>(null)
-  const [connectionStatus, setConnectionStatus] = useState<string>('Connecting...')
+  const [, setConnectionStatus] = useState<string>('Connecting...')
   const [error, setError] = useState<string | null>(null)
+  const [colyseusRoom, setColyseusRoom] = useState<ColyseusRoom | null>(null)
 
   useEffect(() => {
     async function joinRoom() {
@@ -46,7 +67,7 @@ export default function RoomDetailPage() {
       }
 
       const colyseusRoom = (await client.joinById(id)) as ColyseusRoom
-      console.log('Fetched room:', colyseusRoom)
+      setColyseusRoom(colyseusRoom)
 
       try {
         setRoom({
@@ -58,7 +79,6 @@ export default function RoomDetailPage() {
         setConnectionStatus('Connected')
 
         colyseusRoom.onStateChange((state: RoomMetadata) => {
-          console.log('Room state changed:', state)
           setRoom((prev) => (prev ? { ...prev, state } : null))
         })
 
@@ -67,8 +87,7 @@ export default function RoomDetailPage() {
           setError(message || 'An error occurred')
         })
 
-        colyseusRoom.onLeave((code) => {
-          console.log('Left room:', code)
+        colyseusRoom.onLeave(() => {
           setConnectionStatus('Disconnected')
         })
       } catch (error) {
@@ -88,11 +107,40 @@ export default function RoomDetailPage() {
 
     return () => {
       req.then((room) => {
-        console.log('Leaving room:', room)
         room?.leave()
       })
     }
   }, [id])
+
+  const handleNewGame = async () => {
+    if (!colyseusRoom) return
+    try {
+      colyseusRoom.send('new-game')
+    } catch (error) {
+      console.error('Failed to start new game:', error)
+      setError('Failed to start new game')
+    }
+  }
+
+  const handleReady = async () => {
+    if (!colyseusRoom) return
+    try {
+      colyseusRoom.send('ready', true)
+    } catch (error) {
+      console.error('Failed to set ready status:', error)
+      setError('Failed to set ready status')
+    }
+  }
+
+  const players: Player[] = room?.state?.players
+    ? Array.from(room.state.players.entries()).map(([id, data]) => ({
+        id,
+        name: data.name || 'Anonymous',
+        isHost: data.isHost || false,
+        connected: data.connected || false,
+        ready: data.ready || false,
+      }))
+    : []
 
   if (error) {
     return (
@@ -125,39 +173,25 @@ export default function RoomDetailPage() {
               Back to Lobby
             </Link>
           </Button>
-          <h1 className='text-xl font-bold'>Room {room?.state?.displayName}</h1>
+          <h1 className='text-xl font-bold'>
+            {room?.state?.displayName}
+            <Badge variant='secondary' className='text-xs'>
+              {type?.toUpperCase()}
+            </Badge>
+          </h1>
         </div>
-        <Badge variant={connectionStatus === 'Connected' ? 'default' : 'destructive'}>{connectionStatus}</Badge>
       </div>
 
       {room && (
-        <div className='grid gap-4'>
-          <Card>
-            <CardHeader className='py-3'>
-              <CardTitle className='text-lg'>Room Information</CardTitle>
-              <CardDescription className='text-xs'>Type: {type}</CardDescription>
-            </CardHeader>
-            <CardContent className='py-2'>
-              <div className='space-y-1 text-sm'>
-                <p>
-                  <span className='font-semibold'>Room ID:</span> {room.roomId}
-                </p>
-                <p>
-                  <span className='font-semibold'>Room Name:</span> {room.state?.displayName}
-                </p>
-                <p>
-                  <span className='font-semibold'>Players:</span> {room.state?.players?.size || 0} /{' '}
-                  {room.maxClients || '∞'}
-                </p>
-                <div className='flex flex-col gap-2'>
-                  <span className='font-semibold'>State:</span>
-                  <pre className='mt-2 p-2 bg-muted rounded-md overflow-auto text-xs'>
-                    {JSON.stringify(room.state, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className='flex flex-col gap-4'>
+          <GameBoard
+            players={players}
+            gameStatus={room.state?.status || 0}
+            level={JSON.parse(room.state?.test || '{}')}
+            onNewGame={handleNewGame}
+            onReady={handleReady}
+          />
+          <RoomDetail players={players} />
         </div>
       )}
     </div>
