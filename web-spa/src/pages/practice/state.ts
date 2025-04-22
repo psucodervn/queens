@@ -21,6 +21,7 @@ export type GameStateAction =
   | {
       type: 'INITIALIZE'
       level: Level
+      gameStartedAt?: number
     }
   | {
       type: 'RESET_BOARD'
@@ -39,13 +40,28 @@ export type GameStateAction =
   | {
       type: 'UNDO'
     }
+  | {
+      type: 'SET_STATE'
+      state: GameState
+    }
 
-function createInitialGameState(level: Level): GameState {
-  const board = createEmptyBoard(level.colorRegions, level.regionColors)
+function createInitialGameState({ level, gameStartedAt }: { level: Level; gameStartedAt?: number }): GameState {
+  let board = createEmptyBoard(level.colorRegions, level.regionColors)
+
+  if (level.id !== '') {
+    const data = localStorage.getItem(`board:${level.id}`)
+    if (data) {
+      try {
+        board = JSON.parse(data)
+      } catch (error) {
+        console.warn('Error parsing board data from localStorage', error)
+      }
+    }
+  }
 
   return {
     board,
-    startTime: Date.now(),
+    startTime: gameStartedAt || Date.now(),
     level,
     hasWon: false,
     elapsedTime: 0,
@@ -55,43 +71,57 @@ function createInitialGameState(level: Level): GameState {
   }
 }
 
-function gameStateReducer(state: GameState, action: GameStateAction): GameState {
+export function gameStateReducer(state: GameState, action: GameStateAction): GameState {
   let emptyBoard: Board
   let newHistory: Board[]
   let previousBoard: Board
 
+  let nextState: GameState
   switch (action.type) {
+    case 'SET_STATE':
+      nextState = action.state
+      break
     case 'INITIALIZE':
-      return createInitialGameState(action.level)
+      nextState = createInitialGameState({ level: action.level, gameStartedAt: action.gameStartedAt })
+      break
     case 'SET_BOARD':
-      return { ...state, board: action.board }
+      nextState = { ...state, board: action.board }
+      break
     case 'RESET_BOARD':
       emptyBoard = createEmptyBoard(state.level.colorRegions, state.level.regionColors)
-      return {
+      nextState = {
         ...state,
         hasWon: false,
         board: emptyBoard,
         history: [structuredClone(emptyBoard)],
       }
+      break
     case 'CLICK_SQUARE':
-      return handleSquareClick(state, action.row, action.col)
+      nextState = handleSquareClick(state, action.row, action.col)
+      break
     case 'TOGGLE_AUTO_MARK_X':
-      return { ...state, autoMarkX: !state.autoMarkX }
+      nextState = { ...state, autoMarkX: !state.autoMarkX }
+      break
     case 'TOGGLE_SHOW_CLASHING_QUEENS':
-      return { ...state, showClashingQueens: !state.showClashingQueens }
+      nextState = { ...state, showClashingQueens: !state.showClashingQueens }
+      break
     case 'UNDO':
       if (state.history.length <= 1) return state
       newHistory = [...state.history]
       newHistory.pop() // Remove current state
       previousBoard = newHistory[newHistory.length - 1]
-      return {
+      nextState = {
         ...state,
         board: structuredClone(previousBoard),
         history: newHistory,
       }
+      break
     default:
-      return state
+      nextState = state
   }
+
+  localStorage.setItem(`board:${state.level.id}`, JSON.stringify(nextState.board))
+  return nextState
 }
 
 function handleSquareClick(state: GameState, row: number, col: number) {
@@ -122,8 +152,8 @@ function handleSquareClick(state: GameState, row: number, col: number) {
   return { ...state, hasWon: false, board: newBoard, history: newHistory }
 }
 
-export const useGameState = (level: Level) => {
-  const [state, dispatch] = useReducer(gameStateReducer, level, createInitialGameState)
+export const useGameState = (level: Level, gameStartedAt?: number) => {
+  const [state, dispatch] = useReducer(gameStateReducer, { level, gameStartedAt }, createInitialGameState)
 
   return { state, dispatch }
 }

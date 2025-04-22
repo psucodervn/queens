@@ -1,13 +1,15 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { Users } from 'lucide-react'
 
 interface Player {
   id: string
   name: string
-  isHost?: boolean
   connected?: boolean
   ready?: boolean
+  submitted?: string
+  submittedAt?: number
 }
 
 export default function RoomDetail({ players }: { players: Player[] }) {
@@ -16,7 +18,7 @@ export default function RoomDetail({ players }: { players: Player[] }) {
       <CardHeader className='py-3'>
         <div className='flex items-center gap-2'>
           <Users className='h-5 w-5' />
-          <CardTitle className='text-lg'>Players</CardTitle>
+          <CardTitle className=''>Players</CardTitle>
         </div>
         <CardDescription className='text-xs'>
           {players.length} player{players.length !== 1 ? 's' : ''} in the room
@@ -31,32 +33,25 @@ export default function RoomDetail({ players }: { players: Player[] }) {
             >
               <div className='flex items-center gap-2'>
                 <span className='text-sm text-muted-foreground w-6'>{index + 1}.</span>
-                <span className='font-medium'>{player.name}</span>
-                <div className='flex gap-1'>
-                  {player.isHost && (
-                    <Badge variant='secondary' className='text-xs'>
-                      Host
-                    </Badge>
-                  )}
-                  {player.connected ? (
-                    <Badge variant='default' className='text-xs'>
-                      Connected
-                    </Badge>
-                  ) : (
-                    <Badge variant='destructive' className='text-xs'>
-                      Disconnected
-                    </Badge>
-                  )}
-                  {player.ready && (
-                    <Badge variant='outline' className='text-xs bg-green-500/10 text-green-500 border-green-500/20'>
-                      Ready
-                    </Badge>
-                  )}
-                </div>
+                <span className={cn('text-sm', !player.connected && 'text-gray-400 italic')}>{player.name}</span>
               </div>
-              <Badge variant='outline' className='text-xs'>
-                {player.id.slice(0, 8)}...
-              </Badge>
+              <div className='flex items-center gap-2'>
+                {!player.connected && (
+                  <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
+                    Inactive
+                  </Badge>
+                )}
+                {player.connected && player.ready && (
+                  <Badge variant='outline' className='text-xs text-green-600 border-green-500/20'>
+                    Ready
+                  </Badge>
+                )}
+                {player.submitted && (
+                  <Badge variant='outline' className='text-xs'>
+                    Submitted
+                  </Badge>
+                )}
+              </div>
             </div>
           ))}
           {players.length === 0 && (

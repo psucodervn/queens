@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Board } from '@/lib/game/board'
 import { Level } from '@/lib/game/logic'
 import { RefreshCw, Undo2, X } from 'lucide-react'
 import { useEffect } from 'react'
-import { useGameState } from '../state'
+import { gameStateReducer, useGameState } from '../state'
 import GameBoard from './Board'
 import SettingsDialog from './SettingsDialog'
 import Timer from './Timer'
@@ -12,17 +13,24 @@ interface ScreenProps {
   level: Level
   hasToolbar?: boolean
   onRandomize?: () => void
+  onFinish?: (board: Board) => void
+  gameStartedAt?: number
+  gameEndedAt?: number
 }
 
-const Screen = ({ level, hasToolbar = false, onRandomize }: ScreenProps) => {
-  const { state, dispatch } = useGameState(level)
+const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedAt }: ScreenProps) => {
+  const { state, dispatch } = useGameState(level, gameStartedAt)
 
   useEffect(() => {
-    dispatch({ type: 'INITIALIZE', level })
-  }, [level, dispatch])
+    dispatch({ type: 'INITIALIZE', level, gameStartedAt })
+  }, [level, dispatch, gameStartedAt])
 
   function handleSquareClick(row: number, col: number) {
-    dispatch({ type: 'CLICK_SQUARE', row, col })
+    const nextState = gameStateReducer(state, { type: 'CLICK_SQUARE', row, col })
+    dispatch({ type: 'SET_STATE', state: nextState })
+    if (nextState.hasWon) {
+      onFinish?.(nextState.board)
+    }
   }
 
   function handleErase() {
@@ -43,16 +51,16 @@ const Screen = ({ level, hasToolbar = false, onRandomize }: ScreenProps) => {
 
   return (
     <TooltipProvider>
-      <div className='flex flex-col items-center justify-center pt-4 select-none'>
+      <div className='flex flex-col items-center justify-center select-none'>
         <div className='flex flex-col items-center'>
           <div>
-            {hasToolbar && (
-              <div className={`flex w-full items-center space-x-4 py-4 sm:justify-between sm:space-x-0 mb-0'`}>
-                <div className='flex items-center space-x-2'>
-                  <Timer startTime={state.startTime} stopped={state.hasWon} />
-                  {state.hasWon && <div className='text-green-500'>You won!</div>}
-                </div>
+            <div className={`flex w-full items-center space-x-4 py-4 sm:justify-between sm:space-x-0 mb-0'`}>
+              <div className='flex items-center space-x-2'>
+                <Timer startTime={state.startTime} stopped={state.hasWon} />
+                {state.hasWon && <div className='text-green-500'>You won!</div>}
+              </div>
 
+              {hasToolbar && (
                 <div className='flex flex-1 justify-end sm:flex-none'>
                   <div className='relative flex items-center'>
                     {onRandomize && (
@@ -79,8 +87,8 @@ const Screen = ({ level, hasToolbar = false, onRandomize }: ScreenProps) => {
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className='game relative'>
               <GameBoard

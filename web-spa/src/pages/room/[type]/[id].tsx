@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { client } from '@/lib/colyseus'
+import { Board } from '@/lib/game/board'
 import { Room } from 'colyseus.js'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -14,6 +15,8 @@ interface RoomMetadata {
   players: Map<string, PlayerData>
   status: number
   test: string
+  gameStartedAt: number
+  gameEndedAt: number
 }
 
 interface PlayerData {
@@ -132,6 +135,18 @@ export default function RoomDetailPage() {
     }
   }
 
+  const handleFinish = async (board: Board) => {
+    console.log('handleFinish', board)
+    if (!colyseusRoom) return
+
+    try {
+      colyseusRoom.send('submit', JSON.stringify(board))
+    } catch (error) {
+      console.error('Failed to submit board:', error)
+      setError('Failed to submit board')
+    }
+  }
+
   const players: Player[] = room?.state?.players
     ? Array.from(room.state.players.entries()).map(([id, data]) => ({
         id,
@@ -183,15 +198,22 @@ export default function RoomDetailPage() {
       </div>
 
       {room && (
-        <div className='flex flex-col gap-4'>
-          <GameBoard
-            players={players}
-            gameStatus={room.state?.status || 0}
-            level={JSON.parse(room.state?.test || '{}')}
-            onNewGame={handleNewGame}
-            onReady={handleReady}
-          />
-          <RoomDetail players={players} />
+        <div className='flex flex-col gap-4 md:grid md:grid-cols-3'>
+          <div className='md:col-span-2'>
+            <GameBoard
+              players={players}
+              gameStatus={room.state?.status || 0}
+              gameStartedAt={room.state?.gameStartedAt || 0}
+              gameEndedAt={room.state?.gameEndedAt || 0}
+              level={JSON.parse(room.state?.test || '{}')}
+              onNewGame={handleNewGame}
+              onReady={handleReady}
+              onFinish={handleFinish}
+            />
+          </div>
+          <div className='md:col-span-1'>
+            <RoomDetail players={players} />
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { JWT } from "@colyseus/auth";
-import { AuthContext, Client, Room } from "@colyseus/core";
+import { AuthContext, Client, Delayed, Room } from "@colyseus/core";
 import { levels } from "../game/levels";
 import { GameStatus, Player, QueenRoomState } from "./schema/QueenRoomState";
 
@@ -7,10 +7,13 @@ interface QueenRoomMetadata {
   displayName: string;
 }
 
+const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
+
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   maxClients = 20;
   autoDispose: boolean = false;
   state = new QueenRoomState();
+  clearInactivePlayers = new Map<string, Delayed>();
 
   static async onAuth(
     token: string,
@@ -41,35 +44,46 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.onMessage("new-game", this.onNewGame.bind(this));
     this.onMessage("ready", this.onReady.bind(this));
+    this.onMessage("submit", this.onSubmit.bind(this));
+
+    this.clock.start();
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, options, "joined!");
+    const userId = client.auth.id;
 
-    const player = new Player(client.auth.username);
-    this.state.players.set(client.auth.id, player);
+    let player = this.state.players.get(userId);
+    if (!player) {
+      player = new Player(client.auth.username);
+      this.state.players.set(client.auth.id, player);
+    }
+    player.connected = true;
+
+    // clear timeout for inactive player
+    let timeout = this.clearInactivePlayers.get(userId);
+    if (!timeout) {
+      timeout = this.clock.setTimeout(() => {
+        this.state.players.delete(userId);
+      }, TIMEOUT_DISCONNECT);
+      this.clearInactivePlayers.set(userId, timeout);
+    }
+    timeout.pause();
+    timeout.reset();
   }
 
   async onLeave(client: Client, consented: boolean) {
+    const userId = client.auth.id;
+    const player = this.state.players.get(userId);
+    if (!player) {
+      return;
+    }
+
     // flag client as inactive for other users
-    this.state.players.get(client.auth.id).connected = false;
+    player.connected = false;
 
-    this.state.players.delete(client.auth.id);
-    return;
-
-    try {
-      if (consented) {
-        throw new Error("consented leave");
-      }
-
-      // allow disconnected client to reconnect into this room until 20 seconds
-      await this.allowReconnection(client, 10);
-
-      // client returned! let's re-activate it.
-      this.state.players.get(client.auth.id).connected = true;
-    } catch (e) {
-      // 20 seconds expired. let's remove the client.
-      this.state.players.delete(client.auth.id);
+    if (!player.ready) {
+      // clear inactive player after timeout
+      this.clearInactivePlayers.get(userId).resume();
     }
   }
 
@@ -94,6 +108,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.state.test = JSON.stringify(randomLevel);
     this.state.status = GameStatus.PLAYING;
+    this.state.gameStartedAt = Date.now();
   }
 
   onReady(client: Client, message: any) {
@@ -107,6 +122,21 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     if (allPlayersReady) {
       this.startGame();
     }
+  }
+
+  onSubmit(client: Client, message: any) {
+    const player = this.state.players.get(client.auth.id);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    if (player.submittedAt > 0) {
+      console.warn("player already submitted", client.auth.id);
+      return;
+    }
+
+    player.submitted = message;
+    player.submittedAt = Date.now();
   }
 
   onDispose() {

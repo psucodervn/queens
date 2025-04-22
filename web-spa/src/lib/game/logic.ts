@@ -3,7 +3,7 @@ import { Board, ColorRegions, RegionColors } from './board'
 export type Position = { row: number; col: number }
 
 export type Level = {
-  name: string
+  id: string
   size: number
   colorRegions: ColorRegions
   regionColors: RegionColors
