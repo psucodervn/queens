@@ -25,6 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = client.auth.onChange((authData) => {
       console.log('Auth data changed:', authData)
+      if (authData.user) {
+        authData.user.id ??= authData.user.anonymousId
+      }
       setIsLoading(false)
       setUser(authData?.user || null)
       setIsAuthenticated(!authData?.user?.anonymous)

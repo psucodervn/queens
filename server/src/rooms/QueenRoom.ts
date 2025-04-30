@@ -1,7 +1,8 @@
 import { JWT } from "@colyseus/auth";
 import { AuthContext, Client, Delayed, Room } from "@colyseus/core";
 import { levels } from "../game/levels";
-import { GameStatus, Player, QueenRoomState } from "./schema/QueenRoomState";
+import { Player, PlayerStatus } from "./schema/Player";
+import { GameStatus, QueenRoomState } from "./schema/QueenRoomState";
 
 interface QueenRoomMetadata {
   displayName: string;
@@ -10,7 +11,7 @@ interface QueenRoomMetadata {
 const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
-  maxClients = 20;
+  maxClients = 10;
   autoDispose: boolean = false;
   state = new QueenRoomState();
   clearInactivePlayers = new Map<string, Delayed>();
@@ -38,10 +39,6 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.displayName = options.roomName;
     this.state.status = GameStatus.LOBBY;
 
-    this.onMessage("ready", (client, message) => {
-      this.state.players.get(client.auth.id).ready = message;
-    });
-
     this.onMessage("new-game", this.onNewGame.bind(this));
     this.onMessage("ready", this.onReady.bind(this));
     this.onMessage("submit", this.onSubmit.bind(this));
@@ -54,10 +51,10 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     let player = this.state.players.get(userId);
     if (!player) {
-      player = new Player(client.auth.username);
-      this.state.players.set(client.auth.id, player);
+      player = new Player(userId, client.auth.username);
+      this.state.players.set(userId, player);
     }
-    player.connected = true;
+    player.active = true;
 
     // clear timeout for inactive player
     let timeout = this.clearInactivePlayers.get(userId);
@@ -78,13 +75,13 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       return;
     }
 
-    // flag client as inactive for other users
-    player.connected = false;
-
-    if (!player.ready) {
+    if (player.status === PlayerStatus.CONNECTED) {
       // clear inactive player after timeout
       this.clearInactivePlayers.get(userId).resume();
     }
+
+    // flag client as inactive for other users
+    player.active = false;
   }
 
   onNewGame(client: Client, message: any) {
@@ -94,7 +91,8 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     // reset all players ready status
     this.state.players.forEach((player, id) => {
-      player.ready = id === client.auth.id;
+      player.status =
+        id === client.auth.id ? PlayerStatus.READY : PlayerStatus.CONNECTED;
     });
 
     this.state.status = GameStatus.WAITING;
@@ -109,14 +107,18 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.test = JSON.stringify(randomLevel);
     this.state.status = GameStatus.PLAYING;
     this.state.gameStartedAt = Date.now();
+
+    this.state.players.forEach((player, id) => {
+      player.status = PlayerStatus.PLAYING;
+    });
   }
 
   onReady(client: Client, message: any) {
-    this.state.players.get(client.auth.id).ready = message;
+    this.state.players.get(client.auth.id).status = PlayerStatus.READY;
 
     // check if all players are ready
     const allPlayersReady = Array.from(this.state.players.values()).every(
-      (player) => player.ready
+      (player) => player.status === PlayerStatus.READY
     );
 
     if (allPlayersReady) {
@@ -137,6 +139,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     player.submitted = message;
     player.submittedAt = Date.now();
+    player.status = PlayerStatus.SUBMITTED;
   }
 
   onDispose() {

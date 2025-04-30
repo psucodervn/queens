@@ -3,39 +3,25 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { client } from '@/lib/colyseus'
 import { Board } from '@/lib/game/board'
+import { Player } from '@/schema/Player'
 import { Room } from 'colyseus.js'
 import { ArrowLeft } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import GameBoard from './GameBoard'
 import RoomDetail from './RoomDetail'
+import { useAuth } from '@/hooks/useAuth'
 
 interface RoomMetadata {
   displayName: string
-  players: Map<string, PlayerData>
+  players: Map<string, Player>
   status: number
   test: string
   gameStartedAt: number
   gameEndedAt: number
 }
 
-interface PlayerData {
-  name?: string
-  isHost?: boolean
-  connected?: boolean
-  ready?: boolean
-  [key: string]: unknown
-}
-
-interface Player {
-  id: string
-  name: string
-  isHost?: boolean
-  connected?: boolean
-  ready?: boolean
-}
-
-interface RoomState {
+interface RoomStateAll {
   roomId: string
   clients?: Array<{
     id: string
@@ -56,11 +42,17 @@ interface ColyseusRoom extends Room {
 }
 
 export default function RoomDetailPage() {
+  const { user } = useAuth()
+  const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>(undefined)
   const { type, id } = useParams()
-  const [room, setRoom] = useState<RoomState | null>(null)
+  const [room, setRoom] = useState<RoomStateAll | null>(null)
   const [, setConnectionStatus] = useState<string>('Connecting...')
   const [error, setError] = useState<string | null>(null)
   const [colyseusRoom, setColyseusRoom] = useState<ColyseusRoom | null>(null)
+
+  const players = useMemo(() => {
+    return Array.from(room?.state?.players?.values() || [])
+  }, [room?.state?.players])
 
   useEffect(() => {
     async function joinRoom() {
@@ -83,6 +75,7 @@ export default function RoomDetailPage() {
 
         colyseusRoom.onStateChange((state: RoomMetadata) => {
           setRoom((prev) => (prev ? { ...prev, state } : null))
+          setCurrentPlayer(Array.from(state.players.values()).find((p) => p.id === user?.id))
         })
 
         colyseusRoom.onError((code, message) => {
@@ -147,16 +140,6 @@ export default function RoomDetailPage() {
     }
   }
 
-  const players: Player[] = room?.state?.players
-    ? Array.from(room.state.players.entries()).map(([id, data]) => ({
-        id,
-        name: data.name || 'Anonymous',
-        isHost: data.isHost || false,
-        connected: data.connected || false,
-        ready: data.ready || false,
-      }))
-    : []
-
   if (error) {
     return (
       <div className='container mx-auto py-8'>
@@ -209,6 +192,7 @@ export default function RoomDetailPage() {
               onNewGame={handleNewGame}
               onReady={handleReady}
               onFinish={handleFinish}
+              currentPlayer={currentPlayer}
             />
           </div>
           <div className='md:col-span-1'>

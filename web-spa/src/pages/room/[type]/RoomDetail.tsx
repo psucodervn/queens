@@ -1,18 +1,34 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { PlayerStatus } from '@/schema/enums'
+import { Player } from '@/schema/Player'
 import { Users } from 'lucide-react'
 
-interface Player {
-  id: string
-  name: string
-  connected?: boolean
-  ready?: boolean
-  submitted?: string
-  submittedAt?: number
-}
-
 export default function RoomDetail({ players }: { players: Player[] }) {
+  const renderPlayerStatus = (player: Player) => {
+    switch (player.status) {
+      case PlayerStatus.READY:
+        return (
+          <Badge variant='outline' className='text-xs text-green-600 border-green-500/20'>
+            Ready
+          </Badge>
+        )
+      case PlayerStatus.PLAYING:
+        return (
+          <Badge variant='outline' className='text-xs text-blue-600 border-blue-500/20'>
+            Playing
+          </Badge>
+        )
+      case PlayerStatus.SUBMITTED:
+        return (
+          <Badge variant='outline' className='text-xs text-blue-600 border-blue-500/20'>
+            Submitted
+          </Badge>
+        )
+    }
+  }
+
   return (
     <Card>
       <CardHeader className='py-3'>
@@ -33,24 +49,15 @@ export default function RoomDetail({ players }: { players: Player[] }) {
             >
               <div className='flex items-center gap-2'>
                 <span className='text-sm text-muted-foreground w-6'>{index + 1}.</span>
-                <span className={cn('text-sm', !player.connected && 'text-gray-400 italic')}>{player.name}</span>
+                <span className={cn('text-sm', !player.active && 'text-gray-400 italic')}>{player.name}</span>
               </div>
               <div className='flex items-center gap-2'>
-                {!player.connected && (
+                {/* {!player.active && (
                   <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
                     Inactive
                   </Badge>
-                )}
-                {player.connected && player.ready && (
-                  <Badge variant='outline' className='text-xs text-green-600 border-green-500/20'>
-                    Ready
-                  </Badge>
-                )}
-                {player.submitted && (
-                  <Badge variant='outline' className='text-xs'>
-                    Submitted
-                  </Badge>
-                )}
+                )} */}
+                {renderPlayerStatus(player)}
               </div>
             </div>
           ))}

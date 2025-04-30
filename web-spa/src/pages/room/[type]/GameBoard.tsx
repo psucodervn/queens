@@ -3,15 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Board } from '@/lib/game/board'
 import { Level } from '@/lib/game/logic'
 import Screen from '@/pages/practice/components/Screen'
+import { Player } from '@/schema/Player'
 import { LayoutGrid } from 'lucide-react'
-
-interface Player {
-  id: string
-  name: string
-  isHost?: boolean
-  connected?: boolean
-  ready?: boolean
-}
 
 interface GameBoardProps {
   players: Player[]
@@ -22,6 +15,7 @@ interface GameBoardProps {
   onNewGame: () => void
   onReady: () => void
   onFinish: (board: Board) => void
+  currentPlayer?: Player
 }
 
 export default function GameBoard({
@@ -33,6 +27,7 @@ export default function GameBoard({
   onNewGame,
   onReady,
   onFinish,
+  currentPlayer,
 }: GameBoardProps) {
   const renderLobbyState = () => (
     <div className='flex justify-center items-center h-64'>
@@ -43,9 +38,9 @@ export default function GameBoard({
   )
 
   const renderWaitingState = () => (
-    <div className='flex flex-col items-center gap-4 h-64'>
+    <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
       <p className='text-muted-foreground'>Waiting for players to be ready...</p>
-      <Button onClick={onReady} variant='outline'>
+      <Button onClick={onReady} variant='outline' disabled={currentPlayer?.status === 1}>
         I'm Ready
       </Button>
     </div>

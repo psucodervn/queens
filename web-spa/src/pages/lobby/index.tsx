@@ -203,9 +203,6 @@ export default function LobbyPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className='py-2'>
-                    <div className='text-xs text-muted-foreground'>
-                      <p>Metadata: {JSON.stringify(room.metadata || {})}</p>
-                    </div>
                     <Button asChild className='mt-2 w-full text-sm h-8'>
                       <Link to={`/room/${room.name}/${room.roomId}`}>
                         View Room
