@@ -5,6 +5,7 @@ export enum PlayerStatus {
   READY = 1,
   PLAYING = 2,
   SUBMITTED = 3,
+  DID_NOT_FINISH = 4,
 }
 
 export class Player extends Schema {

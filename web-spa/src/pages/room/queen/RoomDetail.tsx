@@ -28,7 +28,7 @@ export default function RoomDetail({ state }: RoomDetailProps) {
         }
         return a.name.localeCompare(b.name)
       })
-  }, [state.players])
+  }, [state.players.values().toArray()])
 
   const renderPlayerStatus = (player: Player) => {
     switch (player.status) {
@@ -75,14 +75,7 @@ export default function RoomDetail({ state }: RoomDetailProps) {
                 <span className='text-sm text-muted-foreground w-4'>{index + 1}.</span>
                 <span className={cn('text-sm', !player.active && 'text-gray-400 italic')}>{player.name}</span>
               </div>
-              <div className='flex items-center gap-2'>
-                {/* {!player.active && (
-                  <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
-                    Inactive
-                  </Badge>
-                )} */}
-                {renderPlayerStatus(player)}
-              </div>
+              <div className='flex items-center gap-2'>{renderPlayerStatus(player)}</div>
             </div>
           ))}
           {players.length === 0 && (

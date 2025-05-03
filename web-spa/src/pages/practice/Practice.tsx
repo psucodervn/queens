@@ -4,11 +4,16 @@ import { useEffect, useState } from 'react'
 import Screen from './components/Screen'
 
 export default function Practice() {
+  const enabled = false
   const [level, setLevel] = useState<Level | null>(null)
 
   useEffect(() => {
-    getRandomLevel().then(setLevel)
+    //   getRandomLevel().then(setLevel)
   }, [])
+
+  if (!enabled) {
+    return <div>Currently disabled</div>
+  }
 
   if (!level) {
     return <div>Loading...</div>

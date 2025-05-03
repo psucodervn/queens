@@ -3,48 +3,31 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { client } from '@/lib/colyseus'
 import { Board } from '@/lib/game/board'
-import { Player } from '@/schema/Player'
 import { Room } from 'colyseus.js'
 import { ArrowLeft } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import GameBoard from './GameBoard'
 import RoomDetail from './RoomDetail'
 import { useAuth } from '@/hooks/useAuth'
-import { QueenRoomState } from '@/schema/QueenRoomState'
-
-interface RoomStateAll {
-  roomId: string
-  clients?: Array<{
-    id: string
-    sessionId: string
-  }>
-  maxClients?: number
-  state: QueenRoomState
-}
-
-interface ColyseusRoom extends Room {
-  id: string
-  clients: Array<{
-    id: string
-    sessionId: string
-  }>
-  maxClients: number
-  state: QueenRoomState
-}
+import { QueenRoomState } from '@/schema'
 
 export default function QueenRoomDetailPage() {
   const GAME_TYPE = 'queen'
 
   const { user } = useAuth()
-  const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>(undefined)
   const { id } = useParams()
-  const [room, setRoom] = useState<RoomStateAll | null>(null)
+  const [room, setRoom] = useState<Room | null>(null)
+  const [state, setState] = useState<QueenRoomState | null>(null)
   const [, setConnectionStatus] = useState<string>('Connecting...')
   const [error, setError] = useState<string | null>(null)
-  const [colyseusRoom, setColyseusRoom] = useState<ColyseusRoom | null>(null)
 
-  let req: Promise<ColyseusRoom | undefined> = Promise.resolve(undefined)
+  let req: Promise<Room | undefined> = Promise.resolve(undefined)
+
+  const currentPlayer = useMemo(() => {
+    if (!user || !user.id || !state) return
+    return state.players.get(user.id)
+  }, [state, user])
 
   useEffect(() => {
     async function joinRoom() {
@@ -53,22 +36,16 @@ export default function QueenRoomDetailPage() {
         return
       }
 
-      const colyseusRoom = (await client.joinById(id)) as ColyseusRoom
-      setColyseusRoom(colyseusRoom)
+      const colyseusRoom = await client.joinById<QueenRoomState>(id)
 
       try {
-        setRoom({
-          roomId: colyseusRoom.roomId,
-          clients: colyseusRoom.clients,
-          maxClients: colyseusRoom.maxClients,
-          state: colyseusRoom.state,
-        })
+        setRoom(colyseusRoom)
         setConnectionStatus('Connected')
 
         colyseusRoom.onStateChange((state: QueenRoomState) => {
           console.log('Room state changed:', state)
-          setRoom((prev) => (prev ? { ...prev, state } : null))
-          setCurrentPlayer(Array.from(state.players.values()).find((p) => p.id === user?.id))
+          //@ts-expect-error
+          setState((prev) => ({ ...prev, ...state }))
         })
 
         colyseusRoom.onError((code, message) => {
@@ -103,9 +80,9 @@ export default function QueenRoomDetailPage() {
   }, [id])
 
   const handleNewGame = async () => {
-    if (!colyseusRoom) return
+    if (!room) return
     try {
-      colyseusRoom.send('new-game')
+      room.send('new-game')
     } catch (error) {
       console.error('Failed to start new game:', error)
       setError('Failed to start new game')
@@ -113,9 +90,9 @@ export default function QueenRoomDetailPage() {
   }
 
   const handleReady = async () => {
-    if (!colyseusRoom) return
+    if (!room) return
     try {
-      colyseusRoom.send('ready', true)
+      room.send('ready', true)
     } catch (error) {
       console.error('Failed to set ready status:', error)
       setError('Failed to set ready status')
@@ -124,10 +101,10 @@ export default function QueenRoomDetailPage() {
 
   const handleFinish = async (board: Board) => {
     console.log('handleFinish', board)
-    if (!colyseusRoom) return
+    if (!room) return
 
     try {
-      colyseusRoom.send('submit', JSON.stringify(board))
+      room.send('submit', JSON.stringify(board))
     } catch (error) {
       console.error('Failed to submit board:', error)
       setError('Failed to submit board')
@@ -146,7 +123,7 @@ export default function QueenRoomDetailPage() {
             <Button asChild variant='outline'>
               <Link to='/lobby'>
                 <ArrowLeft className='mr-2 h-4 w-4' />
-                Back to Lobby
+                Lobby
               </Link>
             </Button>
           </CardContent>
@@ -162,23 +139,23 @@ export default function QueenRoomDetailPage() {
           <Button asChild variant='outline' size='sm'>
             <Link to='/lobby'>
               <ArrowLeft className='mr-1 h-3 w-3' />
-              Back to Lobby
+              Lobby
             </Link>
           </Button>
           <h1 className='text-xl font-bold'>
             {room?.state?.displayName}
-            <Badge variant='secondary' className='text-xs'>
+            <Badge variant='secondary' className='text-xs mx-4'>
               {GAME_TYPE.toUpperCase()}
             </Badge>
           </h1>
         </div>
       </div>
 
-      {room?.state.displayName && (
+      {state?.displayName && (
         <div className='flex flex-col gap-4 md:grid md:grid-cols-3'>
           <div className='md:col-span-2'>
             <GameBoard
-              state={room.state}
+              state={state}
               onNewGame={handleNewGame}
               onReady={handleReady}
               onFinish={handleFinish}
@@ -186,7 +163,7 @@ export default function QueenRoomDetailPage() {
             />
           </div>
           <div className='md:col-span-1'>
-            <RoomDetail state={room.state} />
+            <RoomDetail state={state} />
           </div>
         </div>
       )}

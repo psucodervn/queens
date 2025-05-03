@@ -2,17 +2,21 @@ import { JWT } from "@colyseus/auth";
 import { AuthContext, Client, Delayed, Room } from "@colyseus/core";
 import { levels } from "../game/levels";
 import { Player, PlayerStatus } from "./schema/Player";
-import { GameStatus, QueenRoomState } from "./schema/QueenRoomState";
+import {
+  GameStatus,
+  QueenLeaderboardRecord,
+  QueenRoomState,
+} from "./schema/QueenRoomState";
 
 interface QueenRoomMetadata {
   displayName: string;
 }
 
 const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
-const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
+const DEFAULT_GAME_TIME = 1000 * 60 * 1; // 1 minutes
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
-  maxClients = 10;
+  maxClients = 20;
   autoDispose: boolean = false;
   state = new QueenRoomState();
   clearInactivePlayers = new Map<string, Delayed>();
@@ -92,8 +96,12 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   onNewGame(client: Client, message: any) {
-    if (this.state.status !== GameStatus.LOBBY || this.state.players.size < 2) {
-      throw new Error("Game is not in lobby or not enough players");
+    if (this.state.players.size < 2) {
+      throw new Error("Not enough players");
+    }
+
+    if (![GameStatus.LOBBY, GameStatus.FINISHED].includes(this.state.status)) {
+      throw new Error("Game is not in lobby or finished");
     }
 
     // reset all players ready status
@@ -103,6 +111,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     });
 
     this.state.status = GameStatus.WAITING;
+    this.state.clearLeaderboard();
   }
 
   removePlayer(userId: string) {
@@ -136,10 +145,21 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     }
 
     this.state.status = GameStatus.FINISHED;
-    this.state.gameEndedAt = Date.now();
+    this.state.gameFinishedAt = Date.now();
 
     this.state.players.forEach((player, id) => {
-      player.status = PlayerStatus.SUBMITTED;
+      if (player.status === PlayerStatus.PLAYING) {
+        player.status = PlayerStatus.DID_NOT_FINISH;
+      }
+
+      this.state.addLeaderboardRecord(
+        new QueenLeaderboardRecord(
+          id,
+          player.name,
+          player.status,
+          player.submittedAt - this.state.gameStartedAt
+        )
+      );
     });
   }
 
@@ -170,6 +190,18 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     player.submitted = message;
     player.submittedAt = Date.now();
     player.status = PlayerStatus.SUBMITTED;
+
+    this.checkForFinish();
+  }
+
+  checkForFinish() {
+    const allPlayersSubmitted = Array.from(this.state.players.values()).every(
+      (player) => player.status === PlayerStatus.SUBMITTED
+    );
+
+    if (allPlayersSubmitted) {
+      this.endGame();
+    }
   }
 
   onDispose() {

@@ -9,3 +9,5 @@ export interface Player extends GeneratedPlayer {
 export interface QueenRoomState extends GeneratedQueenRoomState {
   status: GameStatus
 }
+
+export { GameStatus, PlayerStatus }

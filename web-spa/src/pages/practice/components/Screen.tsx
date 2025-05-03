@@ -15,7 +15,7 @@ interface ScreenProps {
   onRandomize?: () => void
   onFinish?: (board: Board) => void
   gameStartedAt?: number
-  gameEndedAt?: number
+  gameFinishedAt?: number
 }
 
 const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedAt }: ScreenProps) => {
@@ -57,7 +57,7 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
             <div className={`flex w-full items-center space-x-4 py-4 sm:justify-between sm:space-x-0 mb-0'`}>
               <div className='flex items-center space-x-2'>
                 <Timer startTime={state.startTime} stopped={state.hasWon} />
-                {state.hasWon && <div className='text-green-500'>You won!</div>}
+                {state.hasWon && <div className='text-green-500 mx-2'>Finished!</div>}
               </div>
 
               {hasToolbar && (
