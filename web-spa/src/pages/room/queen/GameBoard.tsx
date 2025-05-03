@@ -4,34 +4,27 @@ import { Board } from '@/lib/game/board'
 import { Level } from '@/lib/game/logic'
 import Screen from '@/pages/practice/components/Screen'
 import { Player } from '@/schema/Player'
+import { QueenRoomState } from '@/schema/QueenRoomState'
 import { LayoutGrid } from 'lucide-react'
+import { GameStatus } from '@/schema/enums'
+import { useMemo } from 'react'
 
 interface GameBoardProps {
-  players: Player[]
-  gameStatus: number
-  gameStartedAt: number
-  gameEndedAt: number
-  level: Level
+  state: QueenRoomState
   onNewGame: () => void
   onReady: () => void
   onFinish: (board: Board) => void
   currentPlayer?: Player
 }
 
-export default function GameBoard({
-  players,
-  gameStatus,
-  gameStartedAt,
-  gameEndedAt,
-  level,
-  onNewGame,
-  onReady,
-  onFinish,
-  currentPlayer,
-}: GameBoardProps) {
+export default function GameBoard({ state, onNewGame, onReady, onFinish, currentPlayer }: GameBoardProps) {
+  const level = useMemo(() => {
+    return JSON.parse(state.test || '{}') as Level
+  }, [state.test])
+
   const renderLobbyState = () => (
     <div className='flex justify-center items-center h-64'>
-      <Button onClick={onNewGame} disabled={players.length < 2} size='lg'>
+      <Button onClick={onNewGame} disabled={state.players.size < 2} size='lg'>
         Start New Game
       </Button>
     </div>
@@ -48,7 +41,7 @@ export default function GameBoard({
 
   const renderPlayingState = () => (
     <div className='gap-1 bg-muted/20 rounded-lg'>
-      <Screen level={level} onFinish={onFinish} gameStartedAt={gameStartedAt} gameEndedAt={gameEndedAt} />
+      <Screen level={level} onFinish={onFinish} gameStartedAt={state.gameStartedAt} gameEndedAt={state.gameEndedAt} />
     </div>
   )
 
@@ -60,15 +53,15 @@ export default function GameBoard({
           <CardTitle className='text'>Game Board</CardTitle>
         </div>
         <CardDescription className='text-xs p-0'>
-          {gameStatus === 0 && 'Waiting to start a new game'}
-          {gameStatus === 1 && 'Waiting for players to be ready'}
-          {gameStatus === 2 && 'Game in progress'}
+          {state.status === GameStatus.LOBBY && 'Waiting to start a new game'}
+          {state.status === GameStatus.WAITING && 'Waiting for players to be ready'}
+          {state.status === GameStatus.PLAYING && 'Game in progress'}
         </CardDescription>
       </CardHeader>
       <CardContent className='p-0'>
-        {gameStatus === 0 && renderLobbyState()}
-        {gameStatus === 1 && renderWaitingState()}
-        {gameStatus === 2 && renderPlayingState()}
+        {state.status === GameStatus.LOBBY && renderLobbyState()}
+        {state.status === GameStatus.WAITING && renderWaitingState()}
+        {state.status === GameStatus.PLAYING && renderPlayingState()}
       </CardContent>
     </Card>
   )

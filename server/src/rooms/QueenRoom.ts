@@ -9,6 +9,7 @@ interface QueenRoomMetadata {
 }
 
 const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
+const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   maxClients = 10;
@@ -47,6 +48,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   onJoin(client: Client, options: any) {
+    console.log("client joined", client.auth.id);
     const userId = client.auth.id;
 
     let player = this.state.players.get(userId);
@@ -60,7 +62,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     let timeout = this.clearInactivePlayers.get(userId);
     if (!timeout) {
       timeout = this.clock.setTimeout(() => {
-        this.state.players.delete(userId);
+        this.removePlayer(userId);
       }, TIMEOUT_DISCONNECT);
       this.clearInactivePlayers.set(userId, timeout);
     }
@@ -68,7 +70,9 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     timeout.reset();
   }
 
-  async onLeave(client: Client, consented: boolean) {
+  onLeave(client: Client, consented: boolean) {
+    console.log("client left", client.auth.id, consented);
+
     const userId = client.auth.id;
     const player = this.state.players.get(userId);
     if (!player) {
@@ -76,9 +80,12 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     }
 
     if (player.status === PlayerStatus.CONNECTED) {
-      // clear inactive player after timeout
-      this.clearInactivePlayers.get(userId).resume();
+      this.removePlayer(userId);
+      return;
     }
+
+    // clear inactive player after timeout
+    this.clearInactivePlayers.get(userId).resume();
 
     // flag client as inactive for other users
     player.active = false;
@@ -98,6 +105,12 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.status = GameStatus.WAITING;
   }
 
+  removePlayer(userId: string) {
+    this.state.players.delete(userId);
+    this.clearInactivePlayers.get(userId)?.clear();
+    this.clearInactivePlayers.delete(userId);
+  }
+
   startGame() {
     // pick a random level
     const levelValues = Object.values(levels);
@@ -110,6 +123,23 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.state.players.forEach((player, id) => {
       player.status = PlayerStatus.PLAYING;
+    });
+
+    this.clock.setTimeout(() => {
+      this.endGame();
+    }, DEFAULT_GAME_TIME);
+  }
+
+  endGame() {
+    if (this.state.status !== GameStatus.PLAYING) {
+      return;
+    }
+
+    this.state.status = GameStatus.FINISHED;
+    this.state.gameEndedAt = Date.now();
+
+    this.state.players.forEach((player, id) => {
+      player.status = PlayerStatus.SUBMITTED;
     });
   }
 

@@ -1,11 +1,35 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { cn, formatDuration } from '@/lib/utils'
 import { PlayerStatus } from '@/schema/enums'
 import { Player } from '@/schema/Player'
+import { QueenRoomState } from '@/schema/QueenRoomState'
 import { Users } from 'lucide-react'
+import { useMemo } from 'react'
 
-export default function RoomDetail({ players }: { players: Player[] }) {
+export interface RoomDetailProps {
+  state: QueenRoomState
+}
+
+export default function RoomDetail({ state }: RoomDetailProps) {
+  const players = useMemo(() => {
+    return state.players
+      .values()
+      .toArray()
+      .toSorted((a, b) => {
+        if (a.submitted && b.submitted) {
+          return a.submittedAt - b.submittedAt
+        }
+        if (a.submitted) {
+          return -1
+        }
+        if (b.submitted) {
+          return 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+  }, [state.players])
+
   const renderPlayerStatus = (player: Player) => {
     switch (player.status) {
       case PlayerStatus.READY:
@@ -22,8 +46,8 @@ export default function RoomDetail({ players }: { players: Player[] }) {
         )
       case PlayerStatus.SUBMITTED:
         return (
-          <Badge variant='outline' className='text-xs text-blue-600 border-blue-500/20'>
-            Submitted
+          <Badge variant='outline' className='text-xs text-green-600 border-blue-500/20'>
+            {formatDuration(player.submittedAt - state.gameStartedAt)}
           </Badge>
         )
     }
@@ -48,7 +72,7 @@ export default function RoomDetail({ players }: { players: Player[] }) {
               className='flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors'
             >
               <div className='flex items-center gap-2'>
-                <span className='text-sm text-muted-foreground w-6'>{index + 1}.</span>
+                <span className='text-sm text-muted-foreground w-4'>{index + 1}.</span>
                 <span className={cn('text-sm', !player.active && 'text-gray-400 italic')}>{player.name}</span>
               </div>
               <div className='flex items-center gap-2'>

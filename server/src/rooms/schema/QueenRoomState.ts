@@ -5,7 +5,7 @@ export enum GameStatus {
   LOBBY = 0,
   WAITING = 1,
   PLAYING = 2,
-  ENDED = 3,
+  FINISHED = 3,
 }
 
 export class QueenRoomState extends Schema {
