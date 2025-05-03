@@ -14,6 +14,7 @@ interface QueenRoomMetadata {
 
 const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
 const DEFAULT_GAME_TIME = 1000 * 60 * 1; // 1 minutes
+const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   maxClients = 20;
@@ -46,6 +47,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.onMessage("new-game", this.onNewGame.bind(this));
     this.onMessage("ready", this.onReady.bind(this));
+    this.onMessage("start", this.onStart.bind(this));
     this.onMessage("submit", this.onSubmit.bind(this));
 
     this.clock.start();
@@ -96,10 +98,6 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   onNewGame(client: Client, message: any) {
-    if (this.state.players.size < 2) {
-      throw new Error("Not enough players");
-    }
-
     if (![GameStatus.LOBBY, GameStatus.FINISHED].includes(this.state.status)) {
       throw new Error("Game is not in lobby or finished");
     }
@@ -112,6 +110,23 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.state.status = GameStatus.WAITING;
     this.state.clearLeaderboard();
+  }
+
+  onStart(client: Client, message: any) {
+    if (this.state.status !== GameStatus.WAITING) {
+      throw new Error("Game is not in waiting state");
+    }
+
+    if (this.state.players.size < 2) {
+      throw new Error("Not enough players");
+    }
+
+    this.state.status = GameStatus.COUNTDOWNING;
+    this.state.gameStartedAt = Date.now() + DEFAULT_COUNTDOWN_TIME;
+
+    this.clock.setTimeout(() => {
+      this.startGame();
+    }, DEFAULT_COUNTDOWN_TIME);
   }
 
   removePlayer(userId: string) {
@@ -131,7 +146,9 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.gameStartedAt = Date.now();
 
     this.state.players.forEach((player, id) => {
-      player.status = PlayerStatus.PLAYING;
+      if (player.status === PlayerStatus.READY) {
+        player.status = PlayerStatus.PLAYING;
+      }
     });
 
     this.clock.setTimeout(() => {
@@ -148,7 +165,11 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.gameFinishedAt = Date.now();
 
     this.state.players.forEach((player, id) => {
-      if (player.status === PlayerStatus.PLAYING) {
+      if (player.status < PlayerStatus.PLAYING) {
+        return;
+      }
+
+      if (player.status !== PlayerStatus.SUBMITTED) {
         player.status = PlayerStatus.DID_NOT_FINISH;
       }
 
@@ -166,14 +187,14 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   onReady(client: Client, message: any) {
     this.state.players.get(client.auth.id).status = PlayerStatus.READY;
 
-    // check if all players are ready
-    const allPlayersReady = Array.from(this.state.players.values()).every(
-      (player) => player.status === PlayerStatus.READY
-    );
+    // // check if all players are ready
+    // const allPlayersReady = Array.from(this.state.players.values()).every(
+    //   (player) => player.status === PlayerStatus.READY
+    // );
 
-    if (allPlayersReady) {
-      this.startGame();
-    }
+    // if (allPlayersReady) {
+    //   this.startGame();
+    // }
   }
 
   onSubmit(client: Client, message: any) {

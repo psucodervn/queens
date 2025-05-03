@@ -1,16 +1,17 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { client } from '@/lib/colyseus'
-import { Board } from '@/lib/game/board'
 import { Room } from 'colyseus.js'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/useAuth'
+import { client } from '@/lib/colyseus'
+import { Board } from '@/lib/game/board'
 import GameBoard from './GameBoard'
 import RoomDetail from './RoomDetail'
-import { useAuth } from '@/hooks/useAuth'
-import { QueenRoomState } from '@/schema'
+import { QueenRoomState } from '@/schema/queen'
 
 export default function QueenRoomDetailPage() {
   const GAME_TYPE = 'queen'
@@ -44,7 +45,6 @@ export default function QueenRoomDetailPage() {
 
         colyseusRoom.onStateChange((state: QueenRoomState) => {
           console.log('Room state changed:', state)
-          //@ts-expect-error
           setState((prev) => ({ ...prev, ...state }))
         })
 
@@ -96,6 +96,16 @@ export default function QueenRoomDetailPage() {
     } catch (error) {
       console.error('Failed to set ready status:', error)
       setError('Failed to set ready status')
+    }
+  }
+
+  const handleStart = async () => {
+    if (!room) return
+    try {
+      room.send('start')
+    } catch (error) {
+      console.error('Failed to start game:', error)
+      setError('Failed to start game')
     }
   }
 
@@ -158,6 +168,7 @@ export default function QueenRoomDetailPage() {
               state={state}
               onNewGame={handleNewGame}
               onReady={handleReady}
+              onStart={handleStart}
               onFinish={handleFinish}
               currentPlayer={currentPlayer}
             />

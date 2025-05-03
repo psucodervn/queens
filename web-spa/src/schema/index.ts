@@ -1,13 +1,8 @@
 import { GameStatus, PlayerStatus } from './enums'
-import { QueenRoomState as GeneratedQueenRoomState } from './QueenRoomState'
-import { Player as GeneratedPlayer } from './Player'
+import { Player as GeneratedPlayer } from './generated/Player'
 
-export interface Player extends GeneratedPlayer {
-  status: PlayerStatus
-}
-
-export interface QueenRoomState extends GeneratedQueenRoomState {
-  status: GameStatus
+export class Player extends GeneratedPlayer {
+  declare status: PlayerStatus
 }
 
 export { GameStatus, PlayerStatus }

@@ -9,6 +9,7 @@ export enum PlayerStatus {
 export enum GameStatus {
   LOBBY = 0,
   WAITING = 1,
-  PLAYING = 2,
-  FINISHED = 3,
+  COUNTDOWNING = 2,
+  PLAYING = 3,
+  FINISHED = 4,
 }

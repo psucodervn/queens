@@ -2,8 +2,8 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, formatDuration } from '@/lib/utils'
 import { PlayerStatus } from '@/schema/enums'
-import { Player } from '@/schema/Player'
-import { QueenRoomState } from '@/schema/QueenRoomState'
+import { Player } from '@/schema/generated/Player'
+import { QueenRoomState } from '@/schema/queen'
 import { Users } from 'lucide-react'
 import { useMemo } from 'react'
 
@@ -17,14 +17,11 @@ export default function RoomDetail({ state }: RoomDetailProps) {
       .values()
       .toArray()
       .toSorted((a, b) => {
-        if (a.submitted && b.submitted) {
+        if (a.status !== b.status) {
+          return -(a.status - b.status)
+        }
+        if (a.status === PlayerStatus.SUBMITTED && b.status === PlayerStatus.SUBMITTED) {
           return a.submittedAt - b.submittedAt
-        }
-        if (a.submitted) {
-          return -1
-        }
-        if (b.submitted) {
-          return 1
         }
         return a.name.localeCompare(b.name)
       })

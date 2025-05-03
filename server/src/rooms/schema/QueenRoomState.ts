@@ -4,8 +4,9 @@ import { Player, PlayerStatus } from "./Player";
 export enum GameStatus {
   LOBBY = 0,
   WAITING = 1,
-  PLAYING = 2,
-  FINISHED = 3,
+  COUNTDOWNING = 2,
+  PLAYING = 3,
+  FINISHED = 4,
 }
 
 export class QueenLeaderboardRecord extends Schema {
