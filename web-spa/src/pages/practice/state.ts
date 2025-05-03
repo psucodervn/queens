@@ -48,7 +48,7 @@ export type GameStateAction =
 function createInitialGameState({ level, gameStartedAt }: { level: Level; gameStartedAt?: number }): GameState {
   let board = createEmptyBoard(level.colorRegions, level.regionColors)
 
-  if (level.id !== '') {
+  if (level.id) {
     const data = localStorage.getItem(`board:${level.id}`)
     if (data) {
       try {

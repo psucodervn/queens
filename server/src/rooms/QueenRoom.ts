@@ -1,5 +1,11 @@
 import { JWT } from "@colyseus/auth";
-import { AuthContext, Client, Delayed, Room } from "@colyseus/core";
+import {
+  AuthContext,
+  Client,
+  Delayed,
+  Room,
+  RoomException,
+} from "@colyseus/core";
 import { levels } from "../game/levels";
 import { Player, PlayerStatus } from "./schema/Player";
 import {
@@ -15,6 +21,7 @@ interface QueenRoomMetadata {
 const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
 const DEFAULT_GAME_TIME = 1000 * 60 * 1; // 1 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
+const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   maxClients = 20;
@@ -102,10 +109,18 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       throw new Error("Game is not in lobby or finished");
     }
 
+    const newGameThreshold =
+      this.state.players.size * DEFAULT_NEW_GAME_THRESHOLD;
+    if (Date.now() - this.state.gameFinishedAt < newGameThreshold) {
+      throw new Error("New game threshold not met");
+    }
+
     // reset all players ready status
     this.state.players.forEach((player, id) => {
       player.status =
         id === client.auth.id ? PlayerStatus.READY : PlayerStatus.CONNECTED;
+      player.submittedAt = 0;
+      player.submitted = "";
     });
 
     this.state.status = GameStatus.WAITING;
@@ -186,15 +201,6 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   onReady(client: Client, message: any) {
     this.state.players.get(client.auth.id).status = PlayerStatus.READY;
-
-    // // check if all players are ready
-    // const allPlayersReady = Array.from(this.state.players.values()).every(
-    //   (player) => player.status === PlayerStatus.READY
-    // );
-
-    // if (allPlayersReady) {
-    //   this.startGame();
-    // }
   }
 
   onSubmit(client: Client, message: any) {
@@ -227,5 +233,21 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+  }
+
+  onUncaughtException(
+    error: RoomException<this>,
+    methodName:
+      | "onCreate"
+      | "onAuth"
+      | "onJoin"
+      | "onLeave"
+      | "onDispose"
+      | "onMessage"
+      | "setSimulationInterval"
+      | "setInterval"
+      | "setTimeout"
+  ): void {
+    console.error("Uncaught exception in room", this.roomId, methodName, error);
   }
 }
