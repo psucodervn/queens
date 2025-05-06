@@ -10,7 +10,6 @@ import path from "path";
  */
 import { LobbyRoom, RedisDriver, RedisPresence } from "colyseus";
 import { QueenRoom } from "./rooms/QueenRoom";
-import { TangoRoom } from "./rooms/TangoRoom";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -21,7 +20,6 @@ export default config({
      * Define your room handlers:
      */
     gameServer.define("queen", QueenRoom).enableRealtimeListing();
-    gameServer.define("tango", TangoRoom).enableRealtimeListing();
   },
 
   initializeExpress: (app) => {
