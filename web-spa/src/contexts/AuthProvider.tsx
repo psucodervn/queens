@@ -12,7 +12,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInAnonymously = () => {
     client.auth
       .signInAnonymously({
-        username: 'Guest',
+        username: 'Anonymous',
       })
       .then((user) => {
         console.log('Signed in anonymously', user)

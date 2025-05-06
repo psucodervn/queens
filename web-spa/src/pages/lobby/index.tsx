@@ -25,8 +25,9 @@ interface QueenRoom extends Room {
 }
 
 const ROOM_TYPES = [
-  { value: 'queen', label: 'Queen Game' },
-  { value: 'tango', label: 'Tango Game' },
+  { value: 'queen', label: 'Queen', disabled: false },
+  { value: 'tango', label: 'Tango', disabled: true },
+  { value: 'zip', label: 'Zip', disabled: true },
 ] as const
 
 type RoomType = (typeof ROOM_TYPES)[number]['value']
@@ -156,7 +157,7 @@ export default function LobbyPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {ROOM_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value} className='text-sm'>
+                        <SelectItem key={type.value} value={type.value} disabled={type.disabled} className='text-sm'>
                           {type.label}
                         </SelectItem>
                       ))}
