@@ -4,7 +4,6 @@ import RootLayout from './components/layouts/RootLayout'
 import Home from './pages/home'
 import LobbyPage from './pages/lobby'
 import LoginPage from './pages/login'
-import MultiplayerPage from './pages/multiplayer'
 import ProfilePage from './pages/profile'
 import QueenRoomDetailPage from './pages/room/queen/[id]'
 
@@ -19,10 +18,6 @@ export const routes = [
       {
         path: '/practice',
         Component: Practice,
-      },
-      {
-        path: '/multiplayer',
-        Component: MultiplayerPage,
       },
       {
         path: '/profile',
