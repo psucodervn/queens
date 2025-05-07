@@ -65,7 +65,7 @@ function createInitialGameState({ level, gameStartedAt }: { level: Level; gameSt
     level,
     hasWon: false,
     elapsedTime: 0,
-    autoMarkX: true,
+    autoMarkX: false,
     showClashingQueens: true,
     history: [structuredClone(board)],
   }

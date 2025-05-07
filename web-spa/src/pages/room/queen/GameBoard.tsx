@@ -20,6 +20,9 @@ interface GameBoardProps {
 
 export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish, currentPlayer }: GameBoardProps) {
   const [remainingTime, setRemainingTime] = useState(0)
+  const isCurrentPlayerReady = useMemo(() => {
+    return !!currentPlayer && currentPlayer.status >= PlayerStatus.READY
+  }, [currentPlayer])
 
   useEffect(() => {
     setRemainingTime(state.gameStartedAt - Date.now())
@@ -45,11 +48,10 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     </div>
   )
 
-  const renderWaitingState = () => {
+  const renderWaitingState = (isCurrentPlayerReady: boolean) => {
     const readyCount = Array.from(state.players.values()).filter(
       (player) => player.status === PlayerStatus.READY,
     ).length
-    const isCurrentPlayerReady = currentPlayer?.status === PlayerStatus.READY
     const canStart = canStartGame(state)
     return (
       <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
@@ -132,6 +134,8 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     )
   }
 
+  const isRoundStarted = state.status === GameStatus.COUNTDOWNING || state.status === GameStatus.PLAYING
+
   return (
     <Card className='gap-0'>
       <CardHeader className='py-2 gap-2'>
@@ -148,9 +152,18 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
       </CardHeader>
       <CardContent className='p-0'>
         {state.status === GameStatus.LOBBY && renderLobbyState()}
-        {state.status === GameStatus.WAITING && renderWaitingState()}
-        {state.status === GameStatus.COUNTDOWNING && renderCountdownState()}
-        {state.status === GameStatus.PLAYING && renderPlayingState()}
+        {state.status === GameStatus.WAITING && renderWaitingState(isCurrentPlayerReady)}
+        {isCurrentPlayerReady && (
+          <>
+            {state.status === GameStatus.COUNTDOWNING && renderCountdownState()}
+            {state.status === GameStatus.PLAYING && renderPlayingState()}
+          </>
+        )}
+        {!isCurrentPlayerReady && isRoundStarted && (
+          <div className='text-center h-32 flex items-center justify-center'>
+            You are not ready. Please wait for next round :|
+          </div>
+        )}
         {state.status === GameStatus.FINISHED && renderFinishedState()}
       </CardContent>
     </Card>
