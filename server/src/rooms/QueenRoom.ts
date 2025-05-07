@@ -28,6 +28,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   autoDispose: boolean = false;
   state = new QueenRoomState();
   clearInactivePlayers = new Map<string, Delayed>();
+  clockEndGame: Delayed | null = null;
 
   static async onAuth(
     token: string,
@@ -76,6 +77,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     if (!timeout) {
       timeout = this.clock.setTimeout(() => {
         this.removePlayer(userId);
+        this.checkForFinish();
       }, TIMEOUT_DISCONNECT);
       this.clearInactivePlayers.set(userId, timeout);
     }
@@ -175,7 +177,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       }
     });
 
-    this.clock.setTimeout(() => {
+    this.clockEndGame = this.clock.setTimeout(() => {
       this.endGame();
     }, DEFAULT_GAME_TIME);
   }
@@ -183,6 +185,11 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   endGame() {
     if (this.state.status !== GameStatus.PLAYING) {
       return;
+    }
+
+    if (this.clockEndGame) {
+      this.clockEndGame.clear();
+      this.clockEndGame = null;
     }
 
     this.state.status = GameStatus.FINISHED;
@@ -231,6 +238,10 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   checkForFinish() {
+    if (this.state.status !== GameStatus.PLAYING) {
+      return;
+    }
+
     const allPlayersSubmitted = Array.from(this.state.players.values()).every(
       (player) =>
         player.status <= PlayerStatus.READY ||

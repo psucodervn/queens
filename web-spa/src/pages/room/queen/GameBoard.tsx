@@ -52,7 +52,9 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     const readyCount = Array.from(state.players.values()).filter(
       (player) => player.status === PlayerStatus.READY,
     ).length
-    const canStart = canStartGame(state)
+
+    const canStart = isCurrentPlayerReady && canStartGame(state)
+
     return (
       <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
         <p className='text-muted-foreground'>
