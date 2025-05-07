@@ -22,7 +22,7 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
   const [remainingTime, setRemainingTime] = useState(0)
   const isCurrentPlayerReady = useMemo(() => {
     return !!currentPlayer && currentPlayer.status >= PlayerStatus.READY
-  }, [currentPlayer])
+  }, [currentPlayer?.status])
 
   useEffect(() => {
     setRemainingTime(state.gameStartedAt - Date.now())

@@ -136,6 +136,15 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       throw new Error("Not enough players");
     }
 
+    const player = this.state.players.get(client.auth.id);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    if (player.status !== PlayerStatus.READY) {
+      throw new Error("Player is not ready");
+    }
+
     this.state.status = GameStatus.COUNTDOWNING;
     this.state.gameStartedAt = Date.now() + DEFAULT_COUNTDOWN_TIME;
 
@@ -223,7 +232,9 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   checkForFinish() {
     const allPlayersSubmitted = Array.from(this.state.players.values()).every(
-      (player) => player.status === PlayerStatus.SUBMITTED
+      (player) =>
+        player.status <= PlayerStatus.READY ||
+        player.status === PlayerStatus.SUBMITTED
     );
 
     if (allPlayersSubmitted) {
