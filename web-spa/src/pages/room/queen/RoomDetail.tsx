@@ -13,19 +13,16 @@ export interface RoomDetailProps {
 
 export default function RoomDetail({ state }: RoomDetailProps) {
   const players = useMemo(() => {
-    return state.players
-      .values()
-      .toArray()
-      .toSorted((a, b) => {
-        if (a.status !== b.status) {
-          return -(a.status - b.status)
-        }
-        if (a.status === PlayerStatus.SUBMITTED && b.status === PlayerStatus.SUBMITTED) {
-          return a.submittedAt - b.submittedAt
-        }
-        return a.name.localeCompare(b.name)
-      })
-  }, [state.players.values().toArray()])
+    return Array.from(state.players.values()).toSorted((a, b) => {
+      if (a.status !== b.status) {
+        return -(a.status - b.status)
+      }
+      if (a.status === PlayerStatus.SUBMITTED && b.status === PlayerStatus.SUBMITTED) {
+        return a.submittedAt - b.submittedAt
+      }
+      return a.name.localeCompare(b.name)
+    })
+  }, [Array.from(state.players.values())])
 
   const renderPlayerStatus = (player: Player) => {
     switch (player.status) {

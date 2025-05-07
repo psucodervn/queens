@@ -18,8 +18,8 @@ interface QueenRoomMetadata {
   displayName: string;
 }
 
-const TIMEOUT_DISCONNECT = 1000 * 10; // 10 seconds
-const DEFAULT_GAME_TIME = 1000 * 60 * 1; // 1 minutes
+const TIMEOUT_DISCONNECT = 1000 * 5; // 5 seconds
+const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
 

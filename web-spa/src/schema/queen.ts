@@ -23,10 +23,7 @@ export function canStartGame(state: QueenRoomState): boolean {
     return false
   }
 
-  const readyCount = state.players
-    .values()
-    .toArray()
-    .filter((player) => player.status === PlayerStatus.READY).length
+  const readyCount = Array.from(state.players.values()).filter((player) => player.status === PlayerStatus.READY).length
 
   return readyCount >= 2
 }

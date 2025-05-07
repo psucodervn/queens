@@ -79,10 +79,14 @@ export default config({
     presence: new RedisPresence({
       host: process.env.REDIS_HOST || "localhost",
       port: parseInt(process.env.REDIS_PORT || "12001"),
+      username: process.env.REDIS_USERNAME,
+      password: process.env.REDIS_PASSWORD,
     }),
     driver: new RedisDriver({
       host: process.env.REDIS_HOST || "localhost",
       port: parseInt(process.env.REDIS_PORT || "12001"),
+      username: process.env.REDIS_USERNAME,
+      password: process.env.REDIS_PASSWORD,
     }),
   },
 });

@@ -46,10 +46,9 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
   )
 
   const renderWaitingState = () => {
-    const readyCount = state.players
-      .values()
-      .toArray()
-      .filter((player) => player.status === PlayerStatus.READY).length
+    const readyCount = Array.from(state.players.values()).filter(
+      (player) => player.status === PlayerStatus.READY,
+    ).length
     const isCurrentPlayerReady = currentPlayer?.status === PlayerStatus.READY
     const canStart = canStartGame(state)
     return (
