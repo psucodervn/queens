@@ -13,6 +13,7 @@ import {
   QueenLeaderboardRecord,
   QueenRoomState,
 } from "./schema/QueenRoomState";
+import { Message } from "./schema/Message";
 
 interface QueenRoomMetadata {
   displayName: string;
@@ -22,6 +23,8 @@ const TIMEOUT_DISCONNECT = 1000 * 5; // 5 seconds
 const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
+const MAX_CHAT_HISTORY = 100;
+const MAX_MESSAGE_LENGTH = 200;
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   maxClients = 20;
@@ -57,6 +60,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.onMessage("ready", this.onReady.bind(this));
     this.onMessage("start", this.onStart.bind(this));
     this.onMessage("submit", this.onSubmit.bind(this));
+    this.onMessage("chat", this.onChat.bind(this));
 
     this.clock.start();
   }
@@ -251,6 +255,18 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     if (allPlayersSubmitted) {
       this.endGame();
     }
+  }
+
+  onChat(client: Client, message: string) {
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return;
+    }
+
+    if (this.state.messages.length >= MAX_CHAT_HISTORY) {
+      this.state.messages.pop();
+    }
+
+    this.state.messages.unshift(new Message(client.auth.id, message));
   }
 
   onDispose() {

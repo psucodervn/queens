@@ -1,5 +1,6 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { Player, PlayerStatus } from "./Player";
+import { Message } from "./Message";
 
 export enum GameStatus {
   LOBBY = 0,
@@ -37,6 +38,7 @@ export class QueenRoomState extends Schema {
   @type("string") test: string;
   @type("int64") gameStartedAt: number;
   @type("int64") gameFinishedAt: number;
+  @type([Message]) messages = new ArraySchema<Message>();
 
   @type([QueenLeaderboardRecord]) leaderboard =
     new ArraySchema<QueenLeaderboardRecord>();
