@@ -141,11 +141,11 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
   const isRoundStarted = state.status === GameStatus.COUNTDOWNING || state.status === GameStatus.PLAYING
 
   return (
-    <Card className='gap-0'>
-      <CardHeader className='py-2 gap-2'>
+    <Card className='p-0'>
+      <CardHeader className='px-4 pt-4 gap-2'>
         <div className='flex items-center gap-2'>
           <LayoutGrid className='h-5 w-5' />
-          <CardTitle className='text'>Game Board</CardTitle>
+          <CardTitle className='p-0 text-sm'>Game Board</CardTitle>
         </div>
         <CardDescription className='text-xs p-0'>
           {state.status === GameStatus.LOBBY && 'Waiting to start a new game'}

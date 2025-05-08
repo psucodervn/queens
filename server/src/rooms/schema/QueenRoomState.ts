@@ -38,7 +38,7 @@ export class QueenRoomState extends Schema {
   @type("string") test: string;
   @type("int64") gameStartedAt: number;
   @type("int64") gameFinishedAt: number;
-  @type([Message]) messages = new ArraySchema<Message>();
+  @type([Message]) chats = new ArraySchema<Message>();
 
   @type([QueenLeaderboardRecord]) leaderboard =
     new ArraySchema<QueenLeaderboardRecord>();

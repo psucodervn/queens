@@ -48,17 +48,17 @@ export default function RoomDetail({ state }: RoomDetailProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className='py-3'>
+    <Card className='p-0'>
+      <CardHeader className='px-4 pt-4'>
         <div className='flex items-center gap-2'>
           <Users className='h-5 w-5' />
-          <CardTitle className=''>Players</CardTitle>
+          <CardTitle className='p-0 text-sm'>Players</CardTitle>
         </div>
         <CardDescription className='text-xs'>
           {players.length} player{players.length !== 1 ? 's' : ''} in the room
         </CardDescription>
       </CardHeader>
-      <CardContent className='py-2'>
+      <CardContent className='px-4 pb-4'>
         <div className='grid gap-2'>
           {players.map((player, index) => (
             <div
@@ -66,8 +66,8 @@ export default function RoomDetail({ state }: RoomDetailProps) {
               className='flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors'
             >
               <div className='flex items-center gap-2'>
-                <span className='text-sm text-muted-foreground w-4'>{index + 1}.</span>
-                <span className={cn('text-sm', !player.active && 'text-gray-400 italic')}>{player.name}</span>
+                <span className='text-xs text-muted-foreground w-4'>{index + 1}.</span>
+                <span className={cn('text-xs', !player.active && 'text-gray-400 italic')}>{player.name}</span>
               </div>
               <div className='flex items-center gap-2'>{renderPlayerStatus(player)}</div>
             </div>

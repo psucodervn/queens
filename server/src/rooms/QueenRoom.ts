@@ -23,7 +23,7 @@ const TIMEOUT_DISCONNECT = 1000 * 5; // 5 seconds
 const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
-const MAX_CHAT_HISTORY = 100;
+const MAX_CHAT_HISTORY = 50;
 const MAX_MESSAGE_LENGTH = 200;
 
 export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
@@ -262,11 +262,16 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       return;
     }
 
-    if (this.state.messages.length >= MAX_CHAT_HISTORY) {
-      this.state.messages.pop();
+    if (this.state.chats.length >= MAX_CHAT_HISTORY) {
+      this.state.chats.shift();
     }
 
-    this.state.messages.unshift(new Message(client.auth.id, message));
+    const player = this.state.players.get(client.auth.id);
+    if (!player) {
+      return;
+    }
+
+    this.state.chats.push(new Message(player.id, player.name, message));
   }
 
   onDispose() {

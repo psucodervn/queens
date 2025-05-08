@@ -12,6 +12,7 @@ import { Board } from '@/lib/game/board'
 import GameBoard from './GameBoard'
 import RoomDetail from './RoomDetail'
 import { QueenRoomState } from '@/schema/queen'
+import ChatBox from '@/components/chat/ChatBox'
 
 export default function QueenRoomDetailPage() {
   const GAME_TYPE = 'queen'
@@ -29,6 +30,19 @@ export default function QueenRoomDetailPage() {
     if (!user || !user.id || !state) return
     return state.players.get(user.id)
   }, [state, user])
+
+  const chatMessages = useMemo(() => {
+    return (
+      state?.chats
+        .map((message) => ({
+          id: message.id,
+          senderId: message.senderId,
+          senderName: message.senderName,
+          content: message.content,
+        }))
+        .reverse() || []
+    )
+  }, [state?.chats.values()])
 
   useEffect(() => {
     async function joinRoom() {
@@ -121,6 +135,16 @@ export default function QueenRoomDetailPage() {
     }
   }
 
+  const handleChat = async (message: string) => {
+    if (!room) return
+    try {
+      room.send('chat', message)
+    } catch (error) {
+      console.error('Failed to send chat message:', error)
+      setError('Failed to send chat message')
+    }
+  }
+
   if (error) {
     return (
       <div className='container mx-auto py-8'>
@@ -173,8 +197,9 @@ export default function QueenRoomDetailPage() {
               currentPlayer={currentPlayer}
             />
           </div>
-          <div className='md:col-span-1'>
+          <div className='md:col-span-1 flex flex-col gap-4'>
             <RoomDetail state={state} />
+            <ChatBox messages={chatMessages} onSend={handleChat} />
           </div>
         </div>
       )}
