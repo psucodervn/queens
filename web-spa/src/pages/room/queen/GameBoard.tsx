@@ -63,13 +63,15 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
             {readyCount}/{state.players.size}
           </span>
         </p>
-        <div>
+        <div className='flex gap-2'>
           <Button onClick={onReady} variant='outline' disabled={isCurrentPlayerReady}>
             I'm Ready
           </Button>
-          <Button onClick={onStart} variant='outline' disabled={!canStart}>
-            Start Game
-          </Button>
+          {isCurrentPlayerReady && (
+            <Button onClick={onStart} variant='outline' disabled={!canStart}>
+              Start Game
+            </Button>
+          )}
         </div>
       </div>
     )
