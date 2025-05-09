@@ -154,7 +154,7 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
           {state.status === GameStatus.FINISHED && 'Game finished'}
         </CardDescription>
       </CardHeader>
-      <CardContent className='p-0'>
+      <CardContent className='p-0 pb-4'>
         {state.status === GameStatus.LOBBY && renderLobbyState()}
         {state.status === GameStatus.WAITING && renderWaitingState(isCurrentPlayerReady)}
         {isCurrentPlayerReady && (
