@@ -20,7 +20,7 @@ interface QueenRoomMetadata {
 }
 
 const TIMEOUT_DISCONNECT = 1000 * 5; // 5 seconds
-const DEFAULT_GAME_TIME = 1000 * 60 * 5; // 5 minutes
+const DEFAULT_GAME_TIME = 1000 * 60 * 3; // 3 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
 const MAX_CHAT_HISTORY = 50;
@@ -115,12 +115,6 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       throw new Error("Game is not in lobby or finished");
     }
 
-    const newGameThreshold =
-      this.state.players.size * DEFAULT_NEW_GAME_THRESHOLD;
-    if (Date.now() - this.state.gameFinishedAt < newGameThreshold) {
-      throw new Error("New game threshold not met");
-    }
-
     // reset all players ready status
     this.state.players.forEach((player, id) => {
       player.status =
@@ -174,6 +168,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.test = JSON.stringify(randomLevel);
     this.state.status = GameStatus.PLAYING;
     this.state.gameStartedAt = Date.now();
+    this.state.gameFinishedAt = 0;
 
     this.state.players.forEach((player, id) => {
       if (player.status === PlayerStatus.READY) {
@@ -217,6 +212,10 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
         )
       );
     });
+
+    this.clock.setTimeout(() => {
+      this.state.status = GameStatus.LOBBY;
+    }, DEFAULT_NEW_GAME_THRESHOLD);
   }
 
   onReady(client: Client, message: any) {

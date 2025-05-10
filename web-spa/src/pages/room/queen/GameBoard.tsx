@@ -8,6 +8,7 @@ import { GameStatus, Player, PlayerStatus } from '@/schema'
 import { useEffect, useMemo, useState } from 'react'
 import { formatDuration } from '@/lib/utils'
 import { canCreateNewGame, canStartGame, QueenRoomState } from '@/schema/queen'
+import { Badge } from '@/components/ui/badge'
 
 interface GameBoardProps {
   state: QueenRoomState
@@ -40,10 +41,57 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     return JSON.parse(state.test || '{}') as Level
   }, [state.test])
 
-  const renderLobbyState = () => (
-    <div className='flex justify-center items-center h-64'>
-      <Button onClick={onNewGame} disabled={!canCreateNewGame(state)} size='lg'>
-        Start New Game
+  const renderLeaderboard = () => {
+    const leaderboard = state.leaderboard
+
+    return (
+      <div className='flex flex-col items-center gap-4 justify-center p-4'>
+        <div className='w-full min-w-64 text-sm'>
+          {leaderboard.map((player, index) => (
+            <div
+              key={player.id}
+              className='flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors'
+            >
+              {player.status === PlayerStatus.SUBMITTED && (
+                <>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-xs text-muted-foreground w-4'>
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                    </span>
+                    <span className='text-xs'>{player.name}</span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Badge variant='outline' className='text-xs text-green-600 border-blue-500/20'>
+                      {formatDuration(player.durationInMs)}
+                    </Badge>
+                  </div>
+                </>
+              )}
+              {player.status === PlayerStatus.DID_NOT_FINISH && (
+                <>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-xs text-muted-foreground w-4'>~</span>
+                    <span className='text-xs'>{player.name}</span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
+                      DNF
+                    </Badge>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const renderLobbyState = (waitingForNewGame: boolean) => (
+    <div className='flex flex-col items-center min-h-64 justify-center'>
+      {state.leaderboard.length > 0 && renderLeaderboard()}
+      <Button onClick={onNewGame} disabled={waitingForNewGame || !canCreateNewGame(state)}>
+        New Game
       </Button>
     </div>
   )
@@ -98,46 +146,6 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     </div>
   )
 
-  const renderFinishedState = () => {
-    // Sort players by submission time (lower is better)
-    const leaderboard = state.leaderboard
-
-    return (
-      <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
-        <div className='w-full max-w-md'>
-          <h3 className='text-lg font-semibold mb-2'>Leaderboard</h3>
-          <div className='space-y-2'>
-            {leaderboard.map((player, index) => (
-              <div key={player.id} className='flex items-center justify-between p-2 rounded-lg bg-muted/20 gap-4'>
-                {player.status === PlayerStatus.SUBMITTED && (
-                  <>
-                    <span className='text-muted-foreground'>#{index + 1}</span>
-                    <div className='flex justify-between gap-2 w-full'>
-                      <span className='font-medium'>{player.name}</span>
-                      <span className='text-green-500'>{formatDuration(player.durationInMs)}</span>
-                    </div>
-                  </>
-                )}
-                {player.status === PlayerStatus.DID_NOT_FINISH && (
-                  <>
-                    <span className='text-muted-foreground'>~</span>
-                    <div className='flex justify-between gap-2 w-full'>
-                      <span className='font-medium'>{player.name}</span>
-                      <span className='text-red-500'>DNF</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        <Button onClick={onNewGame} size='lg'>
-          New Game
-        </Button>
-      </div>
-    )
-  }
-
   const isRoundStarted = state.status === GameStatus.COUNTDOWNING || state.status === GameStatus.PLAYING
 
   return (
@@ -154,8 +162,8 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
           {state.status === GameStatus.FINISHED && 'Game finished'}
         </CardDescription>
       </CardHeader>
-      <CardContent className='p-0'>
-        {state.status === GameStatus.LOBBY && renderLobbyState()}
+      <CardContent className='p-0 pb-4'>
+        {state.status === GameStatus.LOBBY && renderLobbyState(false)}
         {state.status === GameStatus.WAITING && renderWaitingState(isCurrentPlayerReady)}
         {isCurrentPlayerReady && (
           <>
@@ -168,7 +176,7 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
             You are not ready. Please wait for next round :|
           </div>
         )}
-        {state.status === GameStatus.FINISHED && renderFinishedState()}
+        {state.status === GameStatus.FINISHED && renderLobbyState(true)}
       </CardContent>
     </Card>
   )

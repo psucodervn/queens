@@ -1,1 +1,6 @@
-{"dependencies": {}}
+{
+  "dependencies": {},
+  "scripts": {
+    "build": "sh scripts/build.sh"
+  }
+}
