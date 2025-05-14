@@ -6,7 +6,7 @@ export const START_GAME_THRESHOLD_MS = 1000 * 10 // 10 seconds
 
 export type QueenRoomState = Pick<
   GeneratedQueenRoomState,
-  'players' | 'displayName' | 'gameStartedAt' | 'gameFinishedAt' | 'test' | 'leaderboard' | 'chats'
+  'players' | 'displayName' | 'gameStartedAt' | 'gameFinishedAt' | 'test' | 'leaderboard' | 'chats' | 'gameTime'
 > & {
   status: GameStatus
   chats: Message[]

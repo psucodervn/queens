@@ -13,6 +13,7 @@ import GameBoard from './GameBoard'
 import RoomDetail from './RoomDetail'
 import { QueenRoomState } from '@/schema/queen'
 import ChatBox from '@/components/chat/ChatBox'
+import { formatDuration } from '@/lib/utils'
 
 export default function QueenRoomDetailPage() {
   const GAME_TYPE = 'queen'
@@ -178,8 +179,11 @@ export default function QueenRoomDetailPage() {
           </Button>
           <h1 className='text-xl font-bold'>
             {room?.state?.displayName}
-            <Badge variant='secondary' className='text-xs mx-4'>
+            <Badge variant='secondary' className='text-xs mx-2'>
               {GAME_TYPE.toUpperCase()}
+            </Badge>
+            <Badge variant='secondary' className='text-xs mx-2'>
+              Limit: {formatDuration(room?.state?.gameTime || 0)}
             </Badge>
           </h1>
         </div>
