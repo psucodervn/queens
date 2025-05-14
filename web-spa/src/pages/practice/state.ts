@@ -2,6 +2,33 @@ import { Board, createEmptyBoard, placeQueen, removeQueen } from '@/lib/game/boa
 import { checkWinCondition, Level } from '@/lib/game/logic'
 import { useReducer } from 'react'
 
+// Extracted to be reusable across the app
+export function findMissingRegions(board: Board, colorRegions: string[][]) {
+  const regionQueens = new Map<string, boolean>()
+
+  // Check which regions have queens
+  board.forEach((row, rowIndex) => {
+    row.forEach((square, colIndex) => {
+      if (square.value === 'Q') {
+        const regionCode = colorRegions[rowIndex][colIndex]
+        regionQueens.set(regionCode, true)
+      }
+    })
+  })
+
+  // Find regions without queens
+  const missingRegions = new Set<string>()
+  colorRegions.forEach((row) => {
+    row.forEach((regionCode) => {
+      if (!regionQueens.get(regionCode)) {
+        missingRegions.add(regionCode)
+      }
+    })
+  })
+
+  return missingRegions
+}
+
 export type GameState = {
   board: Board
   level: Level
@@ -11,6 +38,8 @@ export type GameState = {
   autoMarkX: boolean
   showClashingQueens: boolean
   history: Board[]
+  missingRegions: Set<string>
+  boardLocked: boolean
 }
 
 export type GameStateAction =
@@ -44,6 +73,9 @@ export type GameStateAction =
       type: 'SET_STATE'
       state: GameState
     }
+  | {
+      type: 'LOCK_BOARD'
+    }
 
 function createInitialGameState({ level, gameStartedAt }: { level: Level; gameStartedAt?: number }): GameState {
   let board = createEmptyBoard(level.colorRegions, level.regionColors)
@@ -68,6 +100,8 @@ function createInitialGameState({ level, gameStartedAt }: { level: Level; gameSt
     autoMarkX: false,
     showClashingQueens: true,
     history: [structuredClone(board)],
+    missingRegions: findMissingRegions(board, level.colorRegions),
+    boardLocked: false,
   }
 }
 
@@ -78,6 +112,8 @@ export function gameStateReducer(state: GameState, action: GameStateAction): Gam
 
   let nextState: GameState
   switch (action.type) {
+    case 'LOCK_BOARD':
+      return { ...state, boardLocked: true }
     case 'SET_STATE':
       nextState = action.state
       break
@@ -94,10 +130,12 @@ export function gameStateReducer(state: GameState, action: GameStateAction): Gam
         hasWon: false,
         board: emptyBoard,
         history: [structuredClone(emptyBoard)],
+        missingRegions: findMissingRegions(emptyBoard, state.level.colorRegions),
       }
       break
     case 'CLICK_SQUARE':
       nextState = handleSquareClick(state, action.row, action.col)
+      nextState.missingRegions = findMissingRegions(nextState.board, state.level.colorRegions)
       break
     case 'TOGGLE_AUTO_MARK_X':
       nextState = { ...state, autoMarkX: !state.autoMarkX }
@@ -114,6 +152,7 @@ export function gameStateReducer(state: GameState, action: GameStateAction): Gam
         ...state,
         board: structuredClone(previousBoard),
         history: newHistory,
+        missingRegions: findMissingRegions(previousBoard, state.level.colorRegions),
       }
       break
     default:
@@ -125,6 +164,9 @@ export function gameStateReducer(state: GameState, action: GameStateAction): Gam
 }
 
 function handleSquareClick(state: GameState, row: number, col: number) {
+  // If board is locked, do nothing
+  if (state.boardLocked) return state
+
   const newBoard = structuredClone(state.board)
   const currentValue = newBoard[row][col].value
 
@@ -146,6 +188,7 @@ function handleSquareClick(state: GameState, row: number, col: number) {
       hasWon: true,
       elapsedTime: Date.now() - state.startTime,
       history: newHistory,
+      boardLocked: true,
     }
   }
 

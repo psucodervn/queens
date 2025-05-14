@@ -8,6 +8,24 @@ import { gameStateReducer, useGameState } from '../state'
 import GameBoard from './Board'
 import SettingsDialog from './SettingsDialog'
 import Timer from './Timer'
+import { formatDuration } from '@/lib/utils'
+
+function MissingRegionIndicator({ level, missingRegions }: { level: Level; missingRegions: Set<string> }) {
+  const regionColors = level.regionColors
+
+  return (
+    <div className='flex items-center gap-2 ml-2'>
+      {Array.from(missingRegions).map((regionCode) => (
+        <div
+          key={regionCode}
+          className='w-5 h-5 border border-black'
+          style={{ backgroundColor: regionColors[regionCode] }}
+          title={`Region ${regionCode} needs a queen`}
+        />
+      ))}
+    </div>
+  )
+}
 
 interface ScreenProps {
   level: Level
@@ -33,19 +51,23 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
     }
   }
 
-  function handleErase() {
-    dispatch({ type: 'RESET_BOARD' })
+  const handleUndo = () => {
+    if (!state.boardLocked) {
+      dispatch({ type: 'UNDO' })
+    }
   }
 
-  function handleToggleAutoMarkX() {
+  const handleErase = () => {
+    if (!state.boardLocked) {
+      dispatch({ type: 'RESET_BOARD' })
+    }
+  }
+
+  const handleToggleAutoMarkX = () => {
     dispatch({ type: 'TOGGLE_AUTO_MARK_X' })
   }
 
-  function handleUndo() {
-    dispatch({ type: 'UNDO' })
-  }
-
-  function handleToggleShowClashingQueens() {
+  const handleToggleShowClashingQueens = () => {
     dispatch({ type: 'TOGGLE_SHOW_CLASHING_QUEENS' })
   }
 
@@ -55,9 +77,16 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
         <div className='flex flex-col items-center'>
           <div>
             <div className={`flex w-full items-center space-x-4 py-4 sm:justify-between sm:space-x-0 mb-0'`}>
-              <div className='flex items-center space-x-2'>
-                <Timer startTime={state.startTime} stopped={state.hasWon} />
-                {state.hasWon && <div className='text-green-500 mx-2'>Finished!</div>}
+              <div className='flex flex-row items-center space-x-2 justify-between w-full'>
+                <Timer startTime={state.startTime} stopped={false} />
+                <div>
+                  {state.hasWon && (
+                    <div className='text-green-600 mx-2'>
+                      Finished in <span className='font-mono'>{formatDuration(state.elapsedTime)}</span>
+                    </div>
+                  )}
+                  <MissingRegionIndicator level={level} missingRegions={state.missingRegions} />
+                </div>
               </div>
 
               {hasToolbar && (
@@ -95,6 +124,7 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
                 board={state.board}
                 onSquareClick={handleSquareClick}
                 showClashingQueens={state.showClashingQueens}
+                boardLocked={state.boardLocked}
               />
             </div>
 
@@ -106,7 +136,7 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
                       variant='outline'
                       size='sm'
                       onClick={handleUndo}
-                      disabled={state.history.length <= 1}
+                      disabled={state.history.length <= 1 || state.boardLocked}
                       className='flex items-center gap-1 w-full'
                     >
                       <Undo2 size={16} />
@@ -124,6 +154,7 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
                       variant='outline'
                       size='sm'
                       onClick={handleErase}
+                      disabled={state.boardLocked}
                       className='flex items-center gap-1 w-full'
                     >
                       <X size={16} />

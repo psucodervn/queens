@@ -10,9 +10,10 @@ interface BoardProps {
   board: Board
   onSquareClick: (row: number, col: number) => void
   showClashingQueens?: boolean
+  boardLocked?: boolean
 }
 
-const GameBoard = ({ board, onSquareClick, showClashingQueens = false }: BoardProps) => {
+const GameBoard = ({ board, onSquareClick, showClashingQueens = false, boardLocked = false }: BoardProps) => {
   const boardSize = board.length
   const { gridSize } = useGridSize(boardSize)
   const [isDragging, setIsDragging] = useState(false)
@@ -22,13 +23,30 @@ const GameBoard = ({ board, onSquareClick, showClashingQueens = false }: BoardPr
   const clashingQueens = showClashingQueens ? getClashingQueens(board) : []
 
   function borderClasses(rowIndex: number, colIndex: number) {
-    return cn(
-      rowIndex > 0 && board[rowIndex - 1][colIndex].color !== board[rowIndex][colIndex].color && 'border-t-2',
-      colIndex > 0 && board[rowIndex][colIndex - 1].color !== board[rowIndex][colIndex].color && 'border-l-2',
-    )
+    const borderClasses: string[] = []
+    const currentColor = board[rowIndex][colIndex].color
+
+    if (rowIndex > 0) {
+      const aboveColor = board[rowIndex - 1][colIndex].color
+      if (aboveColor !== currentColor) {
+        borderClasses.push('border-t-2')
+      }
+    }
+
+    if (colIndex > 0) {
+      const leftColor = board[rowIndex][colIndex - 1].color
+      if (leftColor !== currentColor) {
+        borderClasses.push('border-l-2')
+      }
+    }
+
+    return cn(...borderClasses)
   }
 
   const handlePointerDown = (row: number, col: number) => {
+    // Do nothing if board is locked
+    if (boardLocked) return
+
     const currentValue = board[row][col].value
     // Only start dragging if the square is empty
     if (currentValue === ' ') {
@@ -71,9 +89,11 @@ const GameBoard = ({ board, onSquareClick, showClashingQueens = false }: BoardPr
           <div
             key={`${rowIndex}-${colIndex}`}
             className={cn(
-              'hover:brightness-75 box-border flex h-full items-center justify-center cursor-pointer text-[24px] border-t border-l border-black',
+              'box-border flex h-full items-center justify-center text-[24px] border-t border-l border-black',
               borderClasses(rowIndex, colIndex),
               isClashingQueen(rowIndex, colIndex) && 'text-red-500',
+              !boardLocked && 'hover:brightness-75 cursor-pointer',
+              boardLocked && 'opacity-70 cursor-not-allowed',
             )}
             onPointerDown={() => handlePointerDown(rowIndex, colIndex)}
             onPointerEnter={() => handlePointerEnter(rowIndex, colIndex)}

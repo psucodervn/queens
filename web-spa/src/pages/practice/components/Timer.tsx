@@ -24,7 +24,7 @@ const Timer = ({ startTime, stopped, className = '' }: { startTime: number; stop
       <span
         className={`${seconds < ONE_HOUR_IN_SECONDS ? 'w-10' : seconds < TEN_HOURS_IN_SECONDS ? 'w-14' : 'w-full'}`}
       >
-        {formatDuration(seconds, 'seconds')}
+        {stopped ? `+${formatDuration(seconds, 'seconds')}` : formatDuration(seconds, 'seconds')}
       </span>
     </div>
   )
