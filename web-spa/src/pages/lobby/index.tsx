@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { client } from '@/lib/colyseus'
+import { formatDuration } from '@/lib/utils'
 import { Room, RoomAvailable } from 'colyseus.js'
 import { ArrowRight, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -38,6 +39,7 @@ export default function LobbyPage() {
   const [isCreatingRoom, setIsCreatingRoom] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
   const [selectedRoomType, setSelectedRoomType] = useState<RoomType>('queen')
+  const [gameTime, setGameTime] = useState(3 * 60 * 1000) // Default 3 minutes
   const navigate = useNavigate()
 
   async function setupLobby() {
@@ -115,6 +117,7 @@ export default function LobbyPage() {
       setIsCreatingRoom(true)
       const room = (await client.create(selectedRoomType, {
         roomName: newRoomName.trim(),
+        gameTime: gameTime,
       })) as QueenRoom
       console.log('Created room:', room)
       navigate(`/room/${selectedRoomType}/${room.roomId}`)
@@ -176,6 +179,22 @@ export default function LobbyPage() {
                     className='h-8 text-sm'
                   />
                 </div>
+                <div className='grid gap-1.5'>
+                  <Label htmlFor='gameTime' className='text-xs'>
+                    Game Time (minutes)
+                  </Label>
+                  <Input
+                    id='gameTime'
+                    type='number'
+                    min={0.5}
+                    max={30}
+                    step={0.5}
+                    value={gameTime / 60000}
+                    onChange={(e) => setGameTime(Number(e.target.value) * 60000)}
+                    placeholder='Game duration in minutes'
+                    className='h-8 text-sm'
+                  />
+                </div>
               </div>
               <DialogFooter className='pt-2'>
                 <Button onClick={handleCreateRoom} disabled={isCreatingRoom || !newRoomName.trim()} size='sm'>
@@ -197,16 +216,19 @@ export default function LobbyPage() {
                 <Card key={room.roomId} className='hover:shadow-lg transition-shadow'>
                   <CardHeader className='py-2'>
                     <CardTitle className='text-base'>{room.metadata?.displayName || 'Room ' + room.roomId}</CardTitle>
-                    <CardDescription>
+                    <CardDescription className='flex flex-col gap-2'>
                       <Badge variant='secondary' className='text-xs'>
-                        {room.clients} / {room.maxClients} Players
+                        Players: {room.clients} / {room.maxClients}
+                      </Badge>
+                      <Badge variant='secondary' className='text-xs'>
+                        Time Limit: {formatDuration(room.metadata?.gameTime)}
                       </Badge>
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className='py-2'>
+                  <CardContent className=''>
                     <Button asChild className='mt-2 w-full text-sm h-8'>
                       <Link to={`/room/${room.name}/${room.roomId}`}>
-                        View Room
+                        Join
                         <ArrowRight className='ml-1 h-3 w-3' />
                       </Link>
                     </Button>

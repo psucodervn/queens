@@ -17,10 +17,13 @@ import { Message } from "./schema/Message";
 
 interface QueenRoomMetadata {
   displayName: string;
+  gameTime?: number;
 }
 
 const TIMEOUT_DISCONNECT = 1000 * 5; // 5 seconds
-const DEFAULT_GAME_TIME = 1000 * 60 * 3; // 3 minutes
+const DEFAULT_GAME_TIME = 1000 * 60 * 3; // 3 minutes default
+const MIN_GAME_TIME = 1000 * 30; // Minimum 30 seconds
+const MAX_GAME_TIME = 1000 * 60 * 30; // Maximum 30 minutes
 const DEFAULT_COUNTDOWN_TIME = 1000 * 5; // 5 seconds
 const DEFAULT_NEW_GAME_THRESHOLD = 1000 * 5; // 5 seconds
 const MAX_CHAT_HISTORY = 50;
@@ -50,11 +53,18 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   onCreate(options: any) {
+    let gameTime = options.gameTime || DEFAULT_GAME_TIME;
+    gameTime = Math.min(Math.max(gameTime, MIN_GAME_TIME), MAX_GAME_TIME);
+
     this.setMetadata({
       displayName: options.roomName,
+      gameTime: gameTime,
     });
-    this.state.displayName = options.roomName;
+    this.state.displayName = options.roomName || "Anonymous Room";
     this.state.status = GameStatus.LOBBY;
+
+    // Configure game time
+    this.state.gameTime = gameTime;
 
     this.onMessage("new-game", this.onNewGame.bind(this));
     this.onMessage("ready", this.onReady.bind(this));
@@ -178,7 +188,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     this.clockEndGame = this.clock.setTimeout(() => {
       this.endGame();
-    }, DEFAULT_GAME_TIME);
+    }, this.state.gameTime);
   }
 
   endGame() {
