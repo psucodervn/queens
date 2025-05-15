@@ -15,6 +15,7 @@ export class Player extends Schema {
   @type("boolean") active: boolean = true;
   @type("string") submitted: string = "";
   @type("int64") submittedAt: number = 0;
+  @type("int32") eloRating: number = 1200;
 
   constructor(id: string, name: string) {
     super();

@@ -20,6 +20,10 @@ export default function RoomDetail({ state }: RoomDetailProps) {
       if (a.status === PlayerStatus.SUBMITTED && b.status === PlayerStatus.SUBMITTED) {
         return a.submittedAt - b.submittedAt
       }
+      // If status is the same, sort by Elo rating (higher first)
+      if (a.eloRating !== b.eloRating) {
+        return b.eloRating - a.eloRating
+      }
       return a.name.localeCompare(b.name)
     })
   }, [Array.from(state.players.values())])
@@ -68,6 +72,9 @@ export default function RoomDetail({ state }: RoomDetailProps) {
               <div className='flex items-center gap-2'>
                 <span className='text-xs text-muted-foreground w-4'>{index + 1}.</span>
                 <span className={cn('text-xs', !player.active && 'text-gray-400 italic')}>{player.name}</span>
+                <Badge variant='outline' className='text-xs border-yellow-500/20'>
+                  {player.eloRating}
+                </Badge>
               </div>
               <div className='flex items-center gap-2'>{renderPlayerStatus(player)}</div>
             </div>

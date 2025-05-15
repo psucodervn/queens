@@ -8,10 +8,14 @@ const WinningScreen = ({
   timer,
   close,
   onRefetch,
+  eloRating,
+  eloChange,
 }: {
   timer: number
   close: () => void
   onRefetch?: () => Promise<void>
+  eloRating?: number
+  eloChange?: number
 }) => {
   return (
     <div
@@ -38,6 +42,22 @@ const WinningScreen = ({
             <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-black'>
               <div className='text-lg'>{formatDuration(timer)}</div>
               <div className='text-sm font-medium'>Solve Time</div>
+            </div>
+          </div>
+        )}
+        {eloRating !== undefined && (
+          <div className='relative flex justify-center'>
+            <img src={goldenChicletBg} alt='Golden chiclet background' className='h-16 w-full rounded object-cover' />
+            <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-black'>
+              <div className='text-lg flex items-center justify-center'>
+                {eloRating}
+                {eloChange !== undefined && eloChange !== 0 && (
+                  <span className={`ml-2 text-sm ${eloChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {eloChange > 0 ? '+' : ''}{eloChange}
+                  </span>
+                )}
+              </div>
+              <div className='text-sm font-medium'>Elo Rating</div>
             </div>
           </div>
         )}

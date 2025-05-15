@@ -15,12 +15,16 @@ export class QueenLeaderboardRecord extends Schema {
   @type("string") name: string;
   @type("uint8") status: PlayerStatus;
   @type("int64") durationInMs: number;
+  @type("int32") eloRating: number;
+  @type("int32") eloChange: number;
 
   constructor(
     id: string,
     name: string,
     status: PlayerStatus,
-    durationInMs: number
+    durationInMs: number,
+    eloRating: number = 1200,
+    eloChange: number = 0
   ) {
     super();
 
@@ -28,6 +32,8 @@ export class QueenLeaderboardRecord extends Schema {
     this.name = name;
     this.status = status;
     this.durationInMs = durationInMs;
+    this.eloRating = eloRating;
+    this.eloChange = eloChange;
   }
 }
 

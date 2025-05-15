@@ -61,9 +61,21 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
                     <span className='text-xs'>{player.name}</span>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <Badge variant='outline' className='text-xs text-green-600 border-blue-500/20'>
-                      {formatDuration(player.durationInMs)}
-                    </Badge>
+                    <div className='flex items-center gap-2'>
+                      <Badge variant='outline' className='text-xs text-green-600 border-blue-500/20'>
+                        {formatDuration(player.durationInMs)}
+                      </Badge>
+                      {player.eloRating && (
+                        <Badge variant='outline' className='text-xs border-yellow-500/20'>
+                          {player.eloRating}
+                          {player.eloChange !== 0 && (
+                            <span className={player.eloChange > 0 ? 'text-green-600' : 'text-red-600'}>
+                              {player.eloChange > 0 ? ' +' : ' '}{player.eloChange}
+                            </span>
+                          )}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
@@ -74,9 +86,21 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
                     <span className='text-xs'>{player.name}</span>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
-                      DNF
-                    </Badge>
+                    <div className='flex items-center gap-2'>
+                      <Badge variant='outline' className='text-xs text-red-600 border-red-500/20'>
+                        DNF
+                      </Badge>
+                      {player.eloRating && (
+                        <Badge variant='outline' className='text-xs border-yellow-500/20'>
+                          {player.eloRating}
+                          {player.eloChange !== 0 && (
+                            <span className={player.eloChange > 0 ? 'text-green-600' : 'text-red-600'}>
+                              {player.eloChange > 0 ? ' +' : ' '}{player.eloChange}
+                            </span>
+                          )}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

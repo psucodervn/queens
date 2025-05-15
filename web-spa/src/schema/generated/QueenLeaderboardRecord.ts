@@ -13,4 +13,6 @@ export class QueenLeaderboardRecord extends Schema {
     @type("string") public name!: string;
     @type("uint8") public status!: number;
     @type("int64") public durationInMs!: number;
+    @type("int32") public eloRating!: number;
+    @type("int32") public eloChange!: number;
 }
