@@ -10,6 +10,7 @@ import path from "path";
  */
 import { LobbyRoom, RedisDriver, RedisPresence } from "colyseus";
 import { QueenRoom } from "./rooms/QueenRoom";
+import apiRouter from "./api";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -57,6 +58,11 @@ export default config({
      * Read more: https://docs.colyseus.io/auth/module
      */
     app.use(auth.prefix, auth.routes());
+
+    /**
+     * Use custom API routes
+     */
+    app.use("/api", apiRouter);
 
     /**
      * Bind your custom express routes here:
