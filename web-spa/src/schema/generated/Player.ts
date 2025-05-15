@@ -15,4 +15,5 @@ export class Player extends Schema {
     @type("boolean") public active!: boolean;
     @type("string") public submitted!: string;
     @type("int64") public submittedAt!: number;
+    @type("int32") public eloRating!: number;
 }

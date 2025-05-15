@@ -7,6 +7,7 @@ import {
   RoomException,
 } from "@colyseus/core";
 import { levels } from "../game/levels";
+import { EloService } from "../services/EloService";
 import { Player, PlayerStatus } from "./schema/Player";
 import {
   GameStatus,
@@ -204,6 +205,8 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.status = GameStatus.FINISHED;
     this.state.gameFinishedAt = Date.now();
 
+    // Collect players who participated
+    const activePlayers: [string, Player][] = [];
     this.state.players.forEach((player, id) => {
       if (player.status < PlayerStatus.PLAYING) {
         return;
@@ -218,10 +221,50 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
           id,
           player.name,
           player.status,
-          player.submittedAt - this.state.gameStartedAt
+          player.submittedAt - this.state.gameStartedAt,
+          player.eloRating
         )
       );
+      
+      activePlayers.push([id, player]);
     });
+
+    // Update Elo ratings if there are at least 2 active players
+    if (activePlayers.length >= 2) {
+      // Sort players by completion time (DNF players at the end)
+      const sortedPlayers = activePlayers.sort((a, b) => {
+        const aPlayer = a[1];
+        const bPlayer = b[1];
+        
+        // DNF players go to the end
+        if (aPlayer.status === PlayerStatus.DID_NOT_FINISH && bPlayer.status !== PlayerStatus.DID_NOT_FINISH) return 1;
+        if (bPlayer.status === PlayerStatus.DID_NOT_FINISH && aPlayer.status !== PlayerStatus.DID_NOT_FINISH) return -1;
+        
+        // Sort by completion time
+        return (aPlayer.submittedAt || Infinity) - (bPlayer.submittedAt || Infinity);
+      });
+
+      // Calculate new ratings
+      const playerRatings: [string, number][] = sortedPlayers.map(([id, player]) => [id, player.eloRating]);
+      const finishOrder = sortedPlayers.map(([id]) => id);
+      const newRatings = EloService.calculateMultiPlayerRatings(playerRatings, finishOrder);
+
+      // Update player ratings and leaderboard records
+      newRatings.forEach((newRating, playerId) => {
+        const player = this.state.players.get(playerId);
+        if (player) {
+          const eloChange = newRating - player.eloRating;
+          player.eloRating = newRating;
+          
+          // Update the leaderboard record with new rating and change
+          const record = this.state.leaderboard.find(r => r.id === playerId);
+          if (record) {
+            record.eloRating = newRating;
+            record.eloChange = eloChange;
+          }
+        }
+      });
+    }
 
     this.clock.setTimeout(() => {
       this.state.status = GameStatus.LOBBY;
