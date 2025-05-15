@@ -6,7 +6,6 @@ import {
   Room,
   RoomException,
 } from "@colyseus/core";
-import { levels } from "../game/levels";
 import { EloService } from "../services/EloService";
 import { Player, PlayerStatus } from "./schema/Player";
 import {
@@ -15,6 +14,7 @@ import {
   QueenRoomState,
 } from "./schema/QueenRoomState";
 import { Message } from "./schema/Message";
+import { getRandomLevel } from "../game";
 
 interface QueenRoomMetadata {
   displayName: string;
@@ -172,9 +172,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   startGame() {
     // pick a random level
-    const levelValues = Object.values(levels);
-    const randomLevel =
-      levelValues[Math.floor(Math.random() * levelValues.length)];
+    const randomLevel = getRandomLevel();
 
     this.state.test = JSON.stringify(randomLevel);
     this.state.status = GameStatus.PLAYING;
@@ -225,7 +223,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
           player.eloRating
         )
       );
-      
+
       activePlayers.push([id, player]);
     });
 
@@ -235,19 +233,34 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       const sortedPlayers = activePlayers.sort((a, b) => {
         const aPlayer = a[1];
         const bPlayer = b[1];
-        
+
         // DNF players go to the end
-        if (aPlayer.status === PlayerStatus.DID_NOT_FINISH && bPlayer.status !== PlayerStatus.DID_NOT_FINISH) return 1;
-        if (bPlayer.status === PlayerStatus.DID_NOT_FINISH && aPlayer.status !== PlayerStatus.DID_NOT_FINISH) return -1;
-        
+        if (
+          aPlayer.status === PlayerStatus.DID_NOT_FINISH &&
+          bPlayer.status !== PlayerStatus.DID_NOT_FINISH
+        )
+          return 1;
+        if (
+          bPlayer.status === PlayerStatus.DID_NOT_FINISH &&
+          aPlayer.status !== PlayerStatus.DID_NOT_FINISH
+        )
+          return -1;
+
         // Sort by completion time
-        return (aPlayer.submittedAt || Infinity) - (bPlayer.submittedAt || Infinity);
+        return (
+          (aPlayer.submittedAt || Infinity) - (bPlayer.submittedAt || Infinity)
+        );
       });
 
       // Calculate new ratings
-      const playerRatings: [string, number][] = sortedPlayers.map(([id, player]) => [id, player.eloRating]);
+      const playerRatings: [string, number][] = sortedPlayers.map(
+        ([id, player]) => [id, player.eloRating]
+      );
       const finishOrder = sortedPlayers.map(([id]) => id);
-      const newRatings = EloService.calculateMultiPlayerRatings(playerRatings, finishOrder);
+      const newRatings = EloService.calculateMultiPlayerRatings(
+        playerRatings,
+        finishOrder
+      );
 
       // Update player ratings and leaderboard records
       newRatings.forEach((newRating, playerId) => {
@@ -255,9 +268,9 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
         if (player) {
           const eloChange = newRating - player.eloRating;
           player.eloRating = newRating;
-          
+
           // Update the leaderboard record with new rating and change
-          const record = this.state.leaderboard.find(r => r.id === playerId);
+          const record = this.state.leaderboard.find((r) => r.id === playerId);
           if (record) {
             record.eloRating = newRating;
             record.eloChange = eloChange;

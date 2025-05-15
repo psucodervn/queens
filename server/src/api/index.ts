@@ -1,11 +1,10 @@
 import express from "express";
-import { levels } from "../game/levels";
+import { getRandomLevel } from "../game";
 
 const apiRouter = express.Router();
-const levelsArray = Object.values(levels);
 
 apiRouter.get("/levels/random", (req, res) => {
-  const level = levelsArray[Math.floor(Math.random() * levelsArray.length)];
+  const level = getRandomLevel();
   res.json(level);
 });
 

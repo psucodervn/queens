@@ -166,24 +166,26 @@ const Screen = ({ level, hasToolbar = false, onRandomize, onFinish, gameStartedA
               </div>
             </div>
 
-            <div className='flex justify-center mt-4 w-full space-x-2'>
-              <div className='w-full'>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={onRandomize}
-                      className='flex items-center gap-1 w-full'
-                    >
-                      <RefreshCw size={16} />
-                      <span>New Game</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>New Game</TooltipContent>
-                </Tooltip>
+            {onRandomize && (
+              <div className='flex justify-center mt-4 w-full space-x-2'>
+                <div className='w-full'>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={onRandomize}
+                        className='flex items-center gap-1 w-full'
+                      >
+                        <RefreshCw size={16} />
+                        <span>New Game</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>New Game</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
