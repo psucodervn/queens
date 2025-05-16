@@ -183,6 +183,8 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       if (player.status === PlayerStatus.READY) {
         player.status = PlayerStatus.PLAYING;
       }
+      player.submitted = "";
+      player.submittedAt = 0;
     });
 
     this.clockEndGame = this.clock.setTimeout(() => {
