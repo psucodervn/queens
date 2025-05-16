@@ -214,6 +214,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
       if (player.status !== PlayerStatus.SUBMITTED) {
         player.status = PlayerStatus.DID_NOT_FINISH;
+        player.submittedAt = this.state.gameFinishedAt + 1000;
       }
 
       this.state.addLeaderboardRecord(
@@ -258,7 +259,16 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
       const playerRatings: [string, number][] = sortedPlayers.map(
         ([id, player]) => [id, player.eloRating]
       );
-      const finishOrder = sortedPlayers.map(([id]) => id);
+      const pos = new Array(sortedPlayers.length).fill(0);
+      pos[0] = 0;
+      for (let i = 1; i < sortedPlayers.length; i++) {
+        const player = sortedPlayers[i][1];
+        if (player.submittedAt > sortedPlayers[i - 1][1].submittedAt) {
+          pos[i] = pos[i - 1] + 1;
+        } else {
+          pos[i] = pos[i - 1];
+        }
+      }
 
       // Track DNF players
       const dnfPlayers = new Set<string>();
@@ -270,7 +280,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
       const newRatings = EloService.calculateMultiPlayerRatings(
         playerRatings,
-        finishOrder,
+        pos,
         dnfPlayers
       );
 

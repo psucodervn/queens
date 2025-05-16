@@ -9,3 +9,25 @@ export async function getRandomLevel(): Promise<Level> {
   }
   return response.json()
 }
+
+interface Player {
+  id: number
+  rating: number
+  newRating?: number
+  dnf: boolean
+  finishTime?: number
+}
+
+export async function calculateEloChanges(players: Player[]): Promise<Player[]> {
+  const response = await fetch(`${API_BASE_URL}/elo/calculate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ players }),
+  })
+  if (!response.ok) {
+    throw new Error('Failed to calculate Elo changes')
+  }
+  return response.json()
+}

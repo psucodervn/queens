@@ -71,10 +71,10 @@ export default function RoomDetail({ state }: RoomDetailProps) {
             >
               <div className='flex items-center gap-2'>
                 <span className='text-xs text-muted-foreground w-4'>{index + 1}.</span>
-                <span className={cn('text-xs', !player.active && 'text-gray-400 italic')}>{player.name}</span>
                 <Badge variant='outline' className='text-xs border-yellow-500/20'>
                   {player.eloRating}
                 </Badge>
+                <span className={cn('text-xs', !player.active && 'text-gray-400 italic')}>{player.name}</span>
               </div>
               <div className='flex items-center gap-2'>{renderPlayerStatus(player)}</div>
             </div>

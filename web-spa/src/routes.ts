@@ -6,6 +6,7 @@ import LobbyPage from './pages/lobby'
 import LoginPage from './pages/login'
 import ProfilePage from './pages/profile'
 import QueenRoomDetailPage from './pages/room/queen/[id]'
+import TestEloPage from './pages/room/queen/test-elo'
 
 export const routes = [
   {
@@ -34,6 +35,10 @@ export const routes = [
       {
         path: '/room/queen/:id',
         Component: QueenRoomDetailPage,
+      },
+      {
+        path: '/room/queen/test-elo',
+        Component: TestEloPage,
       },
     ],
   },

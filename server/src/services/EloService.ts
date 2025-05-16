@@ -1,5 +1,6 @@
 export class EloService {
   private static readonly K_FACTOR = 32;
+  private static readonly DNF_PENALTY = 20; // Fixed penalty for DNF players
 
   /**
    * Calculate new Elo ratings for two players based on game outcome
@@ -17,8 +18,12 @@ export class EloService {
     const expectedScore2 = 1 - expectedScore1;
     const score2 = 1 - score1;
 
-    const newRating1 = Math.round(rating1 + this.K_FACTOR * (score1 - expectedScore1));
-    const newRating2 = Math.round(rating2 + this.K_FACTOR * (score2 - expectedScore2));
+    const newRating1 = Math.round(
+      rating1 + this.K_FACTOR * (score1 - expectedScore1)
+    );
+    const newRating2 = Math.round(
+      rating2 + this.K_FACTOR * (score2 - expectedScore2)
+    );
 
     return [newRating1, newRating2];
   }
@@ -26,40 +31,36 @@ export class EloService {
   /**
    * Calculate new Elo ratings for multiple players based on their finishing positions
    * @param players Array of [playerId, currentRating]
-   * @param finishOrder Array of playerIds in order of finish (best to worst)
+   * @param pos Array of position of each player
+   * @param dnfPlayers Set of playerIds who did not finish
    * @returns Map of playerId to new rating
    */
   static calculateMultiPlayerRatings(
     players: [string, number][],
-    finishOrder: string[],
+    pos: number[],
     dnfPlayers: Set<string> = new Set()
   ): Map<string, number> {
     const playerMap = new Map(players);
     const newRatings = new Map(players);
-    
-    // Apply fixed penalty to all DNF players
-    const DNF_PENALTY = 10; // Fixed penalty for DNF players
-    dnfPlayers.forEach(playerId => {
-      const currentRating = newRatings.get(playerId);
-      if (currentRating !== undefined) {
-        newRatings.set(playerId, currentRating - DNF_PENALTY);
-      }
-    });
 
     // Only perform Elo calculations among non-DNF players
-    const nonDnfPlayers = finishOrder.filter(id => !dnfPlayers.has(id));
-    
+    const allPlayerIds = players.map(([id]) => id);
+
     // Compare each non-DNF player against every other non-DNF player
-    for (let i = 0; i < nonDnfPlayers.length; i++) {
-      const player1Id = nonDnfPlayers[i];
+    for (let i = 0; i < allPlayerIds.length; i++) {
+      const player1Id = allPlayerIds[i];
       const rating1 = playerMap.get(player1Id)!;
 
-      for (let j = i + 1; j < nonDnfPlayers.length; j++) {
-        const player2Id = nonDnfPlayers[j];
+      for (let j = i + 1; j < allPlayerIds.length; j++) {
+        const player2Id = allPlayerIds[j];
         const rating2 = playerMap.get(player2Id)!;
 
         // Player who finished first (lower index) gets score of 1
-        const [newRating1, newRating2] = this.calculateNewRatings(rating1, rating2, 1);
+        const [newRating1, newRating2] = this.calculateNewRatings(
+          rating1,
+          rating2,
+          pos[i] < pos[j] ? 1 : pos[i] === pos[j] ? 0.5 : 0
+        );
 
         // Update running totals
         newRatings.set(
@@ -72,7 +73,6 @@ export class EloService {
         );
       }
     }
-
 
     return newRatings;
   }
