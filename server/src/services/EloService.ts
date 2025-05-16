@@ -31,18 +31,31 @@ export class EloService {
    */
   static calculateMultiPlayerRatings(
     players: [string, number][],
-    finishOrder: string[]
+    finishOrder: string[],
+    dnfPlayers: Set<string> = new Set()
   ): Map<string, number> {
     const playerMap = new Map(players);
     const newRatings = new Map(players);
+    
+    // Apply fixed penalty to all DNF players
+    const DNF_PENALTY = 10; // Fixed penalty for DNF players
+    dnfPlayers.forEach(playerId => {
+      const currentRating = newRatings.get(playerId);
+      if (currentRating !== undefined) {
+        newRatings.set(playerId, currentRating - DNF_PENALTY);
+      }
+    });
 
-    // Compare each player against every other player
-    for (let i = 0; i < finishOrder.length; i++) {
-      const player1Id = finishOrder[i];
+    // Only perform Elo calculations among non-DNF players
+    const nonDnfPlayers = finishOrder.filter(id => !dnfPlayers.has(id));
+    
+    // Compare each non-DNF player against every other non-DNF player
+    for (let i = 0; i < nonDnfPlayers.length; i++) {
+      const player1Id = nonDnfPlayers[i];
       const rating1 = playerMap.get(player1Id)!;
 
-      for (let j = i + 1; j < finishOrder.length; j++) {
-        const player2Id = finishOrder[j];
+      for (let j = i + 1; j < nonDnfPlayers.length; j++) {
+        const player2Id = nonDnfPlayers[j];
         const rating2 = playerMap.get(player2Id)!;
 
         // Player who finished first (lower index) gets score of 1
@@ -59,6 +72,7 @@ export class EloService {
         );
       }
     }
+
 
     return newRatings;
   }
