@@ -259,9 +259,19 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
         ([id, player]) => [id, player.eloRating]
       );
       const finishOrder = sortedPlayers.map(([id]) => id);
+
+      // Track DNF players
+      const dnfPlayers = new Set<string>();
+      sortedPlayers.forEach(([id, player]) => {
+        if (player.status === PlayerStatus.DID_NOT_FINISH) {
+          dnfPlayers.add(id);
+        }
+      });
+
       const newRatings = EloService.calculateMultiPlayerRatings(
         playerRatings,
-        finishOrder
+        finishOrder,
+        dnfPlayers
       );
 
       // Update player ratings and leaderboard records
