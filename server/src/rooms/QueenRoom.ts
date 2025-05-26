@@ -172,7 +172,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   startGame() {
     // pick a random level
-    const randomLevel = getRandomLevel();
+    const randomLevel = getRandomLevel({});
 
     this.state.test = JSON.stringify(randomLevel);
     this.state.status = GameStatus.PLAYING;

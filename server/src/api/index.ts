@@ -5,7 +5,7 @@ import { EloService } from "../services/EloService";
 const apiRouter = express.Router();
 
 apiRouter.get("/levels/random", (req, res) => {
-  const level = getRandomLevel();
+  const level = getRandomLevel({});
   res.json(level);
 });
 

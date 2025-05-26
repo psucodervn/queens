@@ -1,4 +1,5 @@
 import { levels } from "./levels";
+import { customLevels } from "./custom-levels";
 
 const levelsArray = Object.values(levels);
 let lastLevelIndex = -1;
@@ -12,14 +13,22 @@ function rotateCounterClockwise(board: string[][], rotations: number) {
   return board;
 }
 
-export function getRandomLevel(rotateBoard = true) {
+export function getRandomLevel({
+  rotateBoard = true,
+  useCustomLevel = true,
+}: {
+  rotateBoard?: boolean;
+  useCustomLevel?: boolean;
+}) {
+  let levels = useCustomLevel ? customLevels : levelsArray;
   let randomIndex;
   do {
-    randomIndex = Math.floor(Math.random() * levelsArray.length);
+    randomIndex = Math.floor(Math.random() * levels.length);
   } while (randomIndex === lastLevelIndex);
 
   lastLevelIndex = randomIndex;
-  const level = levelsArray[randomIndex];
+  const level = levels[randomIndex];
+  console.log(level, randomIndex);
 
   if (!rotateBoard) {
     return level;
