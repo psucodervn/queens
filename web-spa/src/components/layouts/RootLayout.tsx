@@ -24,21 +24,42 @@ export default function Layout() {
                 <span className='sr-only'>Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side='left' className='w-[240px] sm:w-[280px]'>
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <nav className='flex flex-col space-y-4 mt-4'>
-                <a href='/' className='text-sm font-medium transition-colors hover:text-primary'>
-                  Home
-                </a>
-                <a href='/practice' className='text-sm font-medium transition-colors hover:text-primary'>
-                  Practice
-                </a>
-                <a href='/lobby' className='text-sm font-medium transition-colors hover:text-primary'>
-                  Multiplayer
-                </a>
-              </nav>
+            <SheetContent side='left' className='w-[240px] sm:w-[280px] bg-background p-6'>
+              <div className='flex flex-col space-y-6'>
+                {/* Logo in mobile menu */}
+                <div className='flex items-center space-x-2 mb-4'>
+                  <img src='/queen.svg' alt='Queen Logo' width={32} height={32} />
+                  <h2 className='text-xl font-bold'>Queens</h2>
+                </div>
+
+                {/* Main Navigation */}
+                <div className='space-y-2'>
+                  <h3 className='text-sm font-medium text-muted-foreground'>Main</h3>
+                  <nav className='space-y-1'>
+                    <Button asChild variant='ghost' className='w-full justify-start'>
+                      <NavLink to='/' className='text-sm font-medium'>
+                        Home
+                      </NavLink>
+                    </Button>
+                    <Button asChild variant='ghost' className='w-full justify-start'>
+                      <NavLink to='/practice' className='text-sm font-medium'>
+                        Practice
+                      </NavLink>
+                    </Button>
+                    <Button asChild variant='ghost' className='w-full justify-start'>
+                      <NavLink to='/lobby' className='text-sm font-medium'>
+                        Multiplayer
+                      </NavLink>
+                    </Button>
+                  </nav>
+                </div>
+
+                {/* User Profile */}
+                <div className='space-y-2'>
+                  <h3 className='text-sm font-medium text-muted-foreground'>Profile</h3>
+                  <UserProfileMenu />
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
 
