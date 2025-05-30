@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import {
   altoMain,
   anakiwa,
@@ -9,8 +10,8 @@ import {
   lightWisteria,
   nomad,
   saharaSand,
-  alto,
-  feijoa,
+  turquoiseBlue,
+  lavenderRose,
 } from "./colors";
 import * as raw6Levels from "./custom-levels/6";
 import * as raw7Levels from "./custom-levels/7";
@@ -27,21 +28,22 @@ type RawLevel = {
 };
 
 const mapRawLevelToLevel = (level: RawLevel): Level => ({
+  id: createHash("md5").update(JSON.stringify(level.board)).digest("hex"),
   size: level.size,
   colorRegions: level.board,
   regionColors: {
     A: lightWisteria,
-    B: lightOrchid,
+    B: chardonnay,
     C: anakiwa,
-    D: bittersweet,
-    E: nomad,
-    F: chardonnay,
-    G: celadon,
-    H: saharaSand,
-    I: altoMain,
+    D: celadon,
+    E: altoMain,
+    F: bittersweet,
+    G: saharaSand,
+    H: nomad,
+    I: lightOrchid,
     J: halfBaked,
-    K: alto,
-    L: feijoa,
+    K: turquoiseBlue,
+    L: lavenderRose,
   },
 });
 
