@@ -1,11 +1,16 @@
 import express from "express";
-import { getRandomLevel } from "../game";
+import { getRandomLevel, getLevelById } from "../game";
 import { EloService } from "../services/EloService";
 
 const apiRouter = express.Router();
 
 apiRouter.get("/levels/random", (req, res) => {
   const level = getRandomLevel({});
+  res.json(level);
+});
+
+apiRouter.get("/levels/:id", (req, res) => {
+  const level = getLevelById(req.params.id);
   res.json(level);
 });
 

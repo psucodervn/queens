@@ -48,3 +48,7 @@ export function getRandomLevel({
     colorRegions,
   };
 }
+
+export function getLevelById(id: string) {
+  return customLevels.find((level) => level.id === id);
+}

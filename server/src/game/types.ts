@@ -1,5 +1,5 @@
 export interface Level {
-  id: string;
+  id?: string;
   size: number;
   colorRegions: string[][];
   regionColors: { [key: string]: string };

@@ -10,6 +10,14 @@ export async function getRandomLevel(): Promise<Level> {
   return response.json()
 }
 
+export async function getLevelById(id: string): Promise<Level> {
+  const response = await fetch(`${API_BASE_URL}/levels/${id}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch level by id')
+  }
+  return response.json()
+}
+
 interface Player {
   id: number
   rating: number

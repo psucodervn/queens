@@ -1,4 +1,4 @@
-import Practice from '@/pages/practice/Practice'
+import LevelPage from '@/pages/practice/Level'
 import { createBrowserRouter } from 'react-router-dom'
 import RootLayout from './components/layouts/RootLayout'
 import Home from './pages/home'
@@ -7,6 +7,7 @@ import LoginPage from './pages/login'
 import ProfilePage from './pages/profile'
 import QueenRoomDetailPage from './pages/room/queen/[id]'
 import TestEloPage from './pages/room/queen/test-elo'
+import Practice from './pages/practice'
 
 export const routes = [
   {
@@ -19,6 +20,10 @@ export const routes = [
       {
         path: '/practice',
         Component: Practice,
+      },
+      {
+        path: '/practice/:id',
+        Component: LevelPage,
       },
       {
         path: '/profile',

@@ -13,7 +13,7 @@ export interface RoomDetailProps {
 
 export default function RoomDetail({ state }: RoomDetailProps) {
   const players = useMemo(() => {
-    return Array.from(state.players.values()).toSorted((a, b) => {
+    return Array.from(state.players.values()).sort((a, b) => {
       if (a.status !== b.status) {
         return -(a.status - b.status)
       }
