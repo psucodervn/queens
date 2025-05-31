@@ -70,7 +70,8 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
                           {player.eloRating}
                           {player.eloChange !== 0 && (
                             <span className={player.eloChange > 0 ? 'text-green-600' : 'text-red-600'}>
-                              {player.eloChange > 0 ? ' +' : ' '}{player.eloChange}
+                              {player.eloChange > 0 ? ' +' : ' '}
+                              {player.eloChange}
                             </span>
                           )}
                         </Badge>
@@ -95,7 +96,8 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
                           {player.eloRating}
                           {player.eloChange !== 0 && (
                             <span className={player.eloChange > 0 ? 'text-green-600' : 'text-red-600'}>
-                              {player.eloChange > 0 ? ' +' : ' '}{player.eloChange}
+                              {player.eloChange > 0 ? ' +' : ' '}
+                              {player.eloChange}
                             </span>
                           )}
                         </Badge>
@@ -139,11 +141,9 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
           <Button onClick={onReady} variant='outline' disabled={isCurrentPlayerReady}>
             I'm Ready
           </Button>
-          {isCurrentPlayerReady && (
-            <Button onClick={onStart} variant='outline' disabled={!canStart}>
-              Start Game
-            </Button>
-          )}
+          <Button onClick={onStart} variant='outline' disabled={!canStart}>
+            Start Game
+          </Button>
         </div>
       </div>
     )

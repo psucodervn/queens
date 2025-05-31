@@ -9,6 +9,7 @@ import { formatDuration } from '@/lib/utils'
 import { calculateEloChanges } from '@/lib/api'
 
 const MAX_TIME = 120
+const DNF_PENALTY_TIME = MAX_TIME * 5
 
 interface Player {
   id: number
@@ -19,10 +20,10 @@ interface Player {
 }
 
 function randomPlayer(id: number) {
-  const currentRating = Math.floor(Math.random() * 400) + 1000
+  const currentRating = 1200 // Math.floor(Math.random() * 400) + 1000
   const finishTime = Math.floor(Math.random() * 150) + 1
   const dnf = finishTime > MAX_TIME
-  return { id, rating: currentRating, finishTime: dnf ? MAX_TIME + 1 : finishTime, dnf }
+  return { id, rating: currentRating, finishTime: dnf ? DNF_PENALTY_TIME : finishTime, dnf }
 }
 
 export default function TestEloPage() {
@@ -45,7 +46,7 @@ export default function TestEloPage() {
   const handleEloChanges = async () => {
     // get elo changes from server
     const data = await calculateEloChanges(
-      players.map((p) => ({ ...p, finishTime: p.dnf ? MAX_TIME + 1 : p.finishTime! })),
+      players.map((p) => ({ ...p, finishTime: p.dnf ? DNF_PENALTY_TIME : p.finishTime! })),
     )
     setNewPlayers(data)
     setCalculated(true)
@@ -135,7 +136,7 @@ export default function TestEloPage() {
                           onChange={(e) => updateFinishTime(player.id, Number(e.target.value))}
                           className='w-24 pl-8'
                           min='1'
-                          max={MAX_TIME + 1}
+                          max={DNF_PENALTY_TIME}
                           disabled={player.dnf}
                         />
                       </div>

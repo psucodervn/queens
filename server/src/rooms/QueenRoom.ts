@@ -214,7 +214,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
       if (player.status !== PlayerStatus.SUBMITTED) {
         player.status = PlayerStatus.DID_NOT_FINISH;
-        player.submittedAt = this.state.gameFinishedAt + 1000;
+        player.submittedAt = Infinity;
       }
 
       this.state.addLeaderboardRecord(
@@ -232,60 +232,21 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     // Update Elo ratings if there are at least 2 active players
     if (activePlayers.length >= 2) {
-      // Sort players by completion time (DNF players at the end)
-      const sortedPlayers = activePlayers.sort((a, b) => {
-        const aPlayer = a[1];
-        const bPlayer = b[1];
-
-        // DNF players go to the end
-        if (
-          aPlayer.status === PlayerStatus.DID_NOT_FINISH &&
-          bPlayer.status !== PlayerStatus.DID_NOT_FINISH
-        )
-          return 1;
-        if (
-          bPlayer.status === PlayerStatus.DID_NOT_FINISH &&
-          aPlayer.status !== PlayerStatus.DID_NOT_FINISH
-        )
-          return -1;
-
-        // Sort by completion time
-        return (
-          (aPlayer.submittedAt || Infinity) - (bPlayer.submittedAt || Infinity)
-        );
-      });
-
-      // Calculate new ratings
-      const playerRatings: [string, number][] = sortedPlayers.map(
-        ([id, player]) => [id, player.eloRating]
+      const playerRatings = activePlayers.map(
+        ([id, player]) => player.eloRating
       );
-      const pos = new Array(sortedPlayers.length).fill(0);
-      pos[0] = 0;
-      for (let i = 1; i < sortedPlayers.length; i++) {
-        const player = sortedPlayers[i][1];
-        if (player.submittedAt > sortedPlayers[i - 1][1].submittedAt) {
-          pos[i] = pos[i - 1] + 1;
-        } else {
-          pos[i] = pos[i - 1];
-        }
-      }
-
-      // Track DNF players
-      const dnfPlayers = new Set<string>();
-      sortedPlayers.forEach(([id, player]) => {
-        if (player.status === PlayerStatus.DID_NOT_FINISH) {
-          dnfPlayers.add(id);
-        }
-      });
+      const times = activePlayers.map(
+        ([id, player]) => player.submittedAt - this.state.gameStartedAt
+      );
 
       const newRatings = EloService.calculateMultiPlayerRatings(
         playerRatings,
-        pos,
-        dnfPlayers
+        times
       );
 
       // Update player ratings and leaderboard records
-      newRatings.forEach((newRating, playerId) => {
+      newRatings.forEach((newRating, index) => {
+        const playerId = activePlayers[index][0];
         const player = this.state.players.get(playerId);
         if (player) {
           const eloChange = newRating - player.eloRating;
