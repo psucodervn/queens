@@ -80,16 +80,16 @@ export type GameStateAction =
 function createInitialGameState({ level, gameStartedAt }: { level: Level; gameStartedAt?: number }): GameState {
   let board = createEmptyBoard(level.colorRegions, level.regionColors)
 
-  if (level.id) {
-    const data = localStorage.getItem(`board:${level.id}`)
-    if (data) {
-      try {
-        board = JSON.parse(data)
-      } catch (error) {
-        console.warn('Error parsing board data from localStorage', error)
-      }
-    }
-  }
+  // if (level.id) {
+  //   const data = localStorage.getItem(`board:${level.id}`)
+  //   if (data) {
+  //     try {
+  //       board = JSON.parse(data)
+  //     } catch (error) {
+  //       console.warn('Error parsing board data from localStorage', error)
+  //     }
+  //   }
+  // }
 
   return {
     board,
@@ -159,7 +159,7 @@ export function gameStateReducer(state: GameState, action: GameStateAction): Gam
       nextState = state
   }
 
-  localStorage.setItem(`board:${state.level.id}`, JSON.stringify(nextState.board))
+  // localStorage.setItem(`board:${state.level.id}`, JSON.stringify(nextState.board))
   return nextState
 }
 

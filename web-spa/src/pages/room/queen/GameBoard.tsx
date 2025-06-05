@@ -131,6 +131,7 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
 
     return (
       <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
+        {state.leaderboard.length > 0 && renderLeaderboard()}
         <p className='text-muted-foreground'>
           Ready players:{' '}
           <span className='font-mono'>

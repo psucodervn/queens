@@ -3,6 +3,7 @@ import {
   AuthContext,
   Client,
   Delayed,
+  logger,
   Room,
   RoomException,
 } from "@colyseus/core";
@@ -124,7 +125,8 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
   onNewGame(client: Client, message: any) {
     if (![GameStatus.LOBBY, GameStatus.FINISHED].includes(this.state.status)) {
-      throw new Error("Game is not in lobby or finished");
+      logger.warn("Game is not in lobby or finished");
+      return;
     }
 
     // reset all players ready status
@@ -136,25 +138,28 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     });
 
     this.state.status = GameStatus.WAITING;
-    this.state.clearLeaderboard();
   }
 
   onStart(client: Client, message: any) {
     if (this.state.status !== GameStatus.WAITING) {
-      throw new Error("Game is not in waiting state");
+      logger.warn("Game is not in waiting state", this.state.status);
+      return;
     }
 
     if (this.state.players.size < 2) {
-      throw new Error("Not enough players");
+      logger.warn("Not enough players", this.state.players.size);
+      return;
     }
 
     const player = this.state.players.get(client.auth.id);
     if (!player) {
-      throw new Error("Player not found");
+      logger.warn("Player not found", client.auth.id);
+      return;
     }
 
     if (player.status !== PlayerStatus.READY) {
-      throw new Error("Player is not ready");
+      logger.warn("Player is not ready", player.status);
+      return;
     }
 
     this.state.status = GameStatus.COUNTDOWNING;
@@ -179,6 +184,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.status = GameStatus.PLAYING;
     this.state.gameStartedAt = Date.now();
     this.state.gameFinishedAt = 0;
+    this.state.clearLeaderboard();
 
     this.state.players.forEach((player, id) => {
       if (player.status === PlayerStatus.READY) {
@@ -271,7 +277,8 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   onReady(client: Client, message: any) {
     const player = this.state.players.get(client.auth.id);
     if (!player) {
-      throw new Error("Player not found");
+      logger.warn("Player not found", client.auth.id);
+      return;
     }
 
     if (this.state.status === GameStatus.WAITING) {
@@ -284,18 +291,22 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
         this.startGame();
       }, DEFAULT_COUNTDOWN_TIME);
     } else {
-      throw new Error("Game is not in waiting or countdowning state");
+      logger.warn(
+        "Game is not in waiting or countdowning state",
+        this.state.status
+      );
     }
   }
 
   onSubmit(client: Client, message: any) {
     const player = this.state.players.get(client.auth.id);
     if (!player) {
-      throw new Error("Player not found");
+      logger.warn("Player not found", client.auth.id);
+      return;
     }
 
     if (player.submittedAt > 0) {
-      console.warn("player already submitted", client.auth.id);
+      logger.warn("player already submitted", client.auth.id);
       return;
     }
 
@@ -333,6 +344,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
 
     const player = this.state.players.get(client.auth.id);
     if (!player) {
+      logger.warn("Player not found", client.auth.id);
       return;
     }
 

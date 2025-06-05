@@ -2,7 +2,6 @@ import { auth } from "@colyseus/auth";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
 import config from "@colyseus/tools";
-import { BunWebSockets } from "@colyseus/bun-websockets";
 import express from "express";
 import path from "path";
 
@@ -14,10 +13,6 @@ import { QueenRoom } from "./rooms/QueenRoom";
 import apiRouter from "./api";
 
 export default config({
-  initializeTransport: (options) => {
-    return new BunWebSockets(options);
-  },
-
   initializeGameServer: (gameServer) => {
     // Expose the LobbyRoom
     gameServer.define("lobby", LobbyRoom);
