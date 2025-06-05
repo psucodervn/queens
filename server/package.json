@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@colyseus/auth": "^0.16.6",
+    "@colyseus/bun-websockets": "^0.16.4",
     "@colyseus/monitor": "^0.16.0",
     "@colyseus/playground": "^0.16.0",
     "@colyseus/tools": "^0.16.0",

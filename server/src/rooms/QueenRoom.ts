@@ -36,6 +36,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   state = new QueenRoomState();
   clearInactivePlayers = new Map<string, Delayed>();
   clockEndGame: Delayed | null = null;
+  clockStartGame: Delayed | null = null;
 
   static async onAuth(
     token: string,
@@ -159,7 +160,7 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
     this.state.status = GameStatus.COUNTDOWNING;
     this.state.gameStartedAt = Date.now() + DEFAULT_COUNTDOWN_TIME;
 
-    this.clock.setTimeout(() => {
+    this.clockStartGame = this.clock.setTimeout(() => {
       this.startGame();
     }, DEFAULT_COUNTDOWN_TIME);
   }
@@ -268,7 +269,23 @@ export class QueenRoom extends Room<QueenRoomState, QueenRoomMetadata> {
   }
 
   onReady(client: Client, message: any) {
-    this.state.players.get(client.auth.id).status = PlayerStatus.READY;
+    const player = this.state.players.get(client.auth.id);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    if (this.state.status === GameStatus.WAITING) {
+      player.status = PlayerStatus.READY;
+    } else if (this.state.status === GameStatus.COUNTDOWNING) {
+      player.status = PlayerStatus.READY;
+      this.clockStartGame?.clear();
+      this.state.gameStartedAt = Date.now() + DEFAULT_COUNTDOWN_TIME;
+      this.clockStartGame = this.clock.setTimeout(() => {
+        this.startGame();
+      }, DEFAULT_COUNTDOWN_TIME);
+    } else {
+      throw new Error("Game is not in waiting or countdowning state");
+    }
   }
 
   onSubmit(client: Client, message: any) {

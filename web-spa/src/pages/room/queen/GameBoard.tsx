@@ -149,12 +149,22 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
     )
   }
 
-  const renderCountdownState = () => {
+  const renderCountdownState = (isCurrentPlayerReady: boolean) => {
     return (
       <div className='flex flex-col items-center gap-4 min-h-64 justify-center'>
         <p className='text-muted-foreground'>
           Game will start in <span className='font-mono'>{formatDuration(remainingTime)}</span>
         </p>
+        {!isCurrentPlayerReady && (
+          <div className='flex gap-2'>
+            <Button onClick={onReady} variant='outline'>
+              Join
+            </Button>
+            <Button onClick={onStart} variant='outline' disabled={true}>
+              Start Game
+            </Button>
+          </div>
+        )}
       </div>
     )
   }
@@ -191,11 +201,12 @@ export default function GameBoard({ state, onNewGame, onReady, onStart, onFinish
         {state.status === GameStatus.WAITING && renderWaitingState(isCurrentPlayerReady)}
         {isCurrentPlayerReady && (
           <>
-            {state.status === GameStatus.COUNTDOWNING && renderCountdownState()}
+            {state.status === GameStatus.COUNTDOWNING && renderCountdownState(true)}
             {state.status === GameStatus.PLAYING && renderPlayingState()}
           </>
         )}
-        {!isCurrentPlayerReady && isRoundStarted && (
+        {!isCurrentPlayerReady && state.status === GameStatus.COUNTDOWNING && renderCountdownState(false)}
+        {!isCurrentPlayerReady && state.status === GameStatus.PLAYING && (
           <div className='text-center h-32 flex items-center justify-center'>
             You are not ready. Please wait for next round :|
           </div>
