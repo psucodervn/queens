@@ -1,34 +1,39 @@
-import { auth } from "@colyseus/auth";
-import { monitor } from "@colyseus/monitor";
-import { playground } from "@colyseus/playground";
-import config from "@colyseus/tools";
-import express from "express";
-import path from "path";
+import { auth } from '@colyseus/auth'
+import { monitor } from '@colyseus/monitor'
+import { playground } from '@colyseus/playground'
+import config from '@colyseus/tools'
+import express from 'express'
+import path from 'path'
 
 /**
  * Import your Room files
  */
-import { LobbyRoom, RedisDriver, RedisPresence } from "colyseus";
-import { QueenRoom } from "./rooms/QueenRoom";
-import apiRouter from "./api";
+import { LobbyRoom, RedisDriver, RedisPresence } from 'colyseus'
+import { QueenRoom } from './rooms/QueenRoom'
+import apiRouter from './api'
+import { BunWebSockets } from '@colyseus/bun-websockets'
 
 export default config({
-  initializeGameServer: (gameServer) => {
+  initializeTransport: transport => {
+    return new BunWebSockets(transport)
+  },
+
+  initializeGameServer: gameServer => {
     // Expose the LobbyRoom
-    gameServer.define("lobby", LobbyRoom);
+    gameServer.define('lobby', LobbyRoom)
 
     /**
      * Define your room handlers:
      */
-    gameServer.define("queen", QueenRoom).enableRealtimeListing();
+    gameServer.define('queen', QueenRoom).enableRealtimeListing()
   },
 
-  initializeExpress: (app) => {
+  initializeExpress: app => {
     /**
      * Use @colyseus/playground
      * (It is not recommended to expose this route in a production environment)
      */
-    app.use("/cs/playground", playground());
+    app.use('/cs/playground', playground())
 
     /**
      * Use @colyseus/monitor
@@ -36,42 +41,46 @@ export default config({
      * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
      */
     app.use(
-      "/cs/monitor",
+      '/cs/monitor',
       monitor({
         columns: [
-          "roomId",
-          "name",
+          'roomId',
+          'name',
           {
-            metadata: "displayName",
+            metadata: 'displayName'
           },
-          "clients",
-          "maxClients",
-          "locked",
-          "elapsedTime",
-          "processId",
-        ],
+          'clients',
+          'maxClients',
+          'locked',
+          'elapsedTime',
+          'processId'
+        ]
       })
-    );
+    )
 
     /**
      * Use @colyseus/auth
      * Read more: https://docs.colyseus.io/auth/module
      */
-    app.use(auth.prefix, auth.routes());
+    app.use(auth.prefix, auth.routes())
 
     /**
      * Use custom API routes
      */
-    app.use("/api", apiRouter);
+    app.use('/api', apiRouter)
 
     /**
      * Bind your custom express routes here:
      * Read more: https://expressjs.com/en/starter/basic-routing.html
      */
-    app.use(express.static(path.resolve(__dirname, "../public")));
-    app.get("*", (req, res) => {
-      res.sendFile(path.resolve(__dirname, "../public/index.html"));
-    });
+    app.use(express.static(path.resolve(__dirname, '../public')))
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(__dirname, '../public/index.html'))
+    })
+
+    app.on('error', error => {
+      console.error('Express server error:', error)
+    })
   },
 
   beforeListen: () => {
@@ -81,18 +90,18 @@ export default config({
   },
 
   options: {
-    devMode: process.env.DEV_MODE === "true",
+    devMode: process.env.DEV_MODE === 'true',
     presence: new RedisPresence({
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || "12001"),
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '12001'),
       username: process.env.REDIS_USERNAME,
-      password: process.env.REDIS_PASSWORD,
+      password: process.env.REDIS_PASSWORD
     }),
     driver: new RedisDriver({
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || "12001"),
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '12001'),
       username: process.env.REDIS_USERNAME,
-      password: process.env.REDIS_PASSWORD,
-    }),
-  },
-});
+      password: process.env.REDIS_PASSWORD
+    })
+  }
+})

@@ -2,7 +2,7 @@
   "dependencies": {},
   "scripts": {
     "build": "sh scripts/build.sh",
-    "dev": "bun run --cwd server dev && bun run --cwd web-spa dev"
+    "dev": "bun run --cwd server dev & bun run --cwd web-spa dev"
   },
   "workspaces": [
     "server",
